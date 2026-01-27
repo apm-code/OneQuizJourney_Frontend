@@ -1,0 +1,31 @@
+.quiz-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.quiz-result-card {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+}
+
+.quiz-result-card h2 {
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+}
+
+.quiz-result-card h3 {
+  color: #007bff;
+}
+
+.list-group-item {
+  transition: background-color 0.2s ease;
+}
+
+.list-group-item:hover:not(:disabled) {
+  cursor: pointer;
+}
+
+.list-group-item:disabled {
+  cursor: not-allowed;
+}

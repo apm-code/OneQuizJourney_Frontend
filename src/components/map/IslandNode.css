@@ -1,0 +1,34 @@
+.island-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  height: 100%;
+}
+
+.island-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.island-completed {
+  border: 3px solid #ffd700;
+}
+
+.island-available {
+  border: 3px solid #007bff;
+}
+
+.island-locked {
+  opacity: 0.6;
+  filter: grayscale(80%);
+  cursor: not-allowed;
+}
+
+.island-locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.island-card img {
+  height: 200px;
+  object-fit: cover;
+}
