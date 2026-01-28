@@ -31,21 +31,38 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
+
+
+  /*
   const logout = async () => {
     await api.post('/auth/logout');
     setUser(null);
+  };
+  */
+
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout'); // o el endpoint que tengáis
+    } catch (err) {
+      // Backend caído / sin conexión → no pasa nada
+    } finally {
+      // SIEMPRE: limpiar sesión local
+      setUser(null);
+      localStorage.removeItem('token'); // si guardas token
+      localStorage.removeItem('user');  // si guardas user
+    }
   };
 
   // - - - - - - - - - - - - - - - - - - - - -
   // Eliminar tras unir el front con el back:
   const devLogin = () => {
-  // SOLO para desarrollo (mock)
-  setUser({
-    id: 'dev-user',
-    username: 'Adri',
-    email: 'adri@dev.local',
-    berries: 0,
-  });
+    // SOLO para desarrollo (mock)
+    setUser({
+      id: 'dev-user',
+      username: 'Adri',
+      email: 'adri@dev.local',
+      berries: 0,
+    });
   };
   // Eliminar también el devLogin de abajo
   // - - - - - - - - - - - - - - - - - - - - -

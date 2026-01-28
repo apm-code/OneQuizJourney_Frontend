@@ -6,3 +6,49 @@
 .map-container h2 {
   font-weight: bold;
 }
+
+
+.map-content {
+  position: relative;
+  z-index: 1;
+}
+
+
+.glass-node {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 15px;
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.glass-node:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+
+
+.glass-node-card {
+  background: rgba(255, 255, 255, 0.1) !important; 
+  backdrop-filter: blur(12px) saturate(160%); 
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 20px !important;
+  color: white;
+  transition: all 0.3s ease-in-out;
+}
+
+.glass-node-card:hover:not(.is-locked) {
+  transform: translateY(-10px);
+  background: rgba(255, 255, 255, 0.18) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.is-locked {
+  filter: grayscale(0.8);
+  cursor: not-allowed;
+}

@@ -1,34 +1,74 @@
-.island-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
+
+.island-glass-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(15px) saturate(150%);
+  -webkit-backdrop-filter: blur(15px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 20px !important;
   height: 100%;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
 }
 
-.island-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+.island-glass-card:not(.locked):hover {
+  transform: translateY(-10px) scale(1.02);
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
-.island-completed {
-  border: 3px solid #ffd700;
+/* Contenedor de imagen */
+.img-container {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
 }
 
-.island-available {
-  border: 3px solid #007bff;
+.island-glass-card img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
 }
 
-.island-locked {
-  opacity: 0.6;
-  filter: grayscale(80%);
+.island-glass-card:hover img {
+  transform: scale(1.1);
+}
+
+/* Badges personalizados tipo cristal */
+.status-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.badge-glass {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.bg-gold { background: rgba(218, 165, 32, 0.6); }
+.bg-blue { background: rgba(0, 123, 255, 0.6); }
+.bg-gray { background: rgba(108, 117, 125, 0.6); }
+
+/* Estados específicos */
+.island-glass-card.completed {
+  border: 1px solid rgba(255, 215, 0, 0.5) !important;
+}
+
+.island-glass-card.locked {
+  opacity: 0.5;
+  filter: grayscale(100%);
   cursor: not-allowed;
 }
 
-.island-locked:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.island-card img {
-  height: 200px;
-  object-fit: cover;
+.locked-info {
+  color: #ff9800;
+  font-style: italic;
 }

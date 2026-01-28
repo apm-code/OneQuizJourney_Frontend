@@ -1,0 +1,23 @@
+/* QuizPage.css */
+.quiz-page-bg {
+  position: relative;
+  min-height: 100vh;
+  background-color: #000;
+}
+
+.quiz-page-bg::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOaJOx09-AcDENOivAnfLFQmDDbqN88HXBHg&s');
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px) brightness(0.7); /* Más blur para concentrarse en la pregunta */
+  transform: scale(1.1);
+  z-index: 0;
+}
+
+.quiz-content-wrapper {
+  position: relative;
+  z-index: 1;
+}

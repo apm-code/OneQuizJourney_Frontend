@@ -1,0 +1,18 @@
+.app-footer {
+  width: 100%;
+  padding: 24px 0;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px) saturate(160%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.footer-text {
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  font-size: 0.85rem;
+}
+
+.footer-muted {
+  color: rgba(255, 255, 255, 0.55);
+}

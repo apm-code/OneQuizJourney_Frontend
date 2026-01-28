@@ -1,160 +1,132 @@
-
-/*
-Lo de la guía:
-
-import React, { useState, useEffect } from 'react';
-import { Container, Table, Spinner, Alert, Badge } from 'react-bootstrap';
-import api from '../services/api';
-
-function RankingPage() {
-  const [ranking, setRanking] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchRanking = async () => {
-      try {
-        // Nota: Este endpoint necesitaría ser implementado en el backend
-        const response = await api.get('/quiz/ranking');
-        setRanking(response.data);
-      } catch (err) {
-        setError('Error al cargar el ranking.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRanking();
-  }, []);
-
-  if (loading) {
-    return (
-      <Container className="text-center mt-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Cargando ranking...</span>
-        </Spinner>
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container className="mt-5">
-        <Alert variant="danger">{error}</Alert>
-      </Container>
-    );
-  }
-
-  const getMedalBadge = (position) => {
-    switch (position) {
-      case 1:
-        return <Badge bg="warning" text="dark">🥇 1°</Badge>;
-      case 2:
-        return <Badge bg="secondary">🥈 2°</Badge>;
-      case 3:
-        return <Badge bg="danger">🥉 3°</Badge>;
-      default:
-        return <Badge bg="light" text="dark">{position}°</Badge>;
-    }
-  };
-
-  return (
-    <Container className="mt-4">
-      <h2 className="mb-4">Ranking de Piratas</h2>
-      
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>Posición</th>
-            <th>Pirata</th>
-            <th>Islas Completadas</th>
-            <th>Puntuación Total</th>
-            <th>Berries</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ranking.length === 0 ? (
-            <tr>
-              <td colSpan="5" className="text-center text-muted">
-                Aún no hay piratas en el ranking
-              </td>
-            </tr>
-          ) : (
-            ranking.map((user, index) => (
-              <tr key={user.id}>
-                <td>{getMedalBadge(index + 1)}</td>
-                <td>
-                  <strong>{user.username}</strong>
-                </td>
-                <td>{user.completedIslands}</td>
-                <td>{user.totalScore}</td>
-                <td>{user.berries}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </Table>
-    </Container>
-  );
-}
-
-export default RankingPage;
-*/
-
-// Provisional:
-
 import React from 'react';
-import { Container, Table, Badge } from 'react-bootstrap';
+import { Container, Card, Table, Badge } from 'react-bootstrap';
+import './RankingPage.css';
+
+import luffyAvatar from '../assets/luffy.jpg.webp';
+import zoroAvatar from '../assets/zoro.jpg.webp';
+import sanjiAvatar from '../assets/sanji.jpg.webp';
+import aceAvatar from '../assets/ace.jpg.webp';
 
 function RankingPage() {
   const ranking = [
-    { id: 'u1', username: 'Luffy', completedIslands: 10, totalScore: 80, berries: 3000 },
-    { id: 'u2', username: 'Zoro', completedIslands: 9, totalScore: 75, berries: 2500 },
-    { id: 'u3', username: 'Nami', completedIslands: 8, totalScore: 70, berries: 5000 },
-    { id: 'u4', username: 'Adri', completedIslands: 1, totalScore: 7, berries: 0 },
+    { id: 'u1', username: 'Luffy', completedIslands: 10, totalScore: 80, berries: 3000, avatar: luffyAvatar },
+    { id: 'u2', username: 'Zoro', completedIslands: 9, totalScore: 75, berries: 2500, avatar: zoroAvatar },
+    { id: 'u3', username: 'Sanji', completedIslands: 8, totalScore: 70, berries: 5000, avatar: sanjiAvatar },
+    { id: 'u4', username: 'Adri', completedIslands: 1, totalScore: 7, berries: 0, avatar: aceAvatar },
   ];
 
+  // (Opcional) ordenamos por score desc (por si luego viene del backend sin ordenar)
+  const sorted = [...ranking].sort((a, b) => b.totalScore - a.totalScore);
+
   const getMedalBadge = (position) => {
+    const baseClass = 'rank-badge medal-icon';
+
     switch (position) {
       case 1:
-        return <Badge bg="warning" text="dark">🥇 1°</Badge>;
+        return (
+          <span className={`${baseClass} medal-gold`}>
+            <span className="material-symbols-outlined">workspace_premium</span>
+            1º
+          </span>
+        );
       case 2:
-        return <Badge bg="secondary">🥈 2°</Badge>;
+        return (
+          <span className={`${baseClass} medal-silver`}>
+            <span className="material-symbols-outlined">workspace_premium</span>
+            2º
+          </span>
+        );
       case 3:
-        return <Badge bg="danger">🥉 3°</Badge>;
+        return (
+          <span className={`${baseClass} medal-bronze`}>
+            <span className="material-symbols-outlined">workspace_premium</span>
+            3º
+          </span>
+        );
       default:
-        return <Badge bg="light" text="dark">{position}°</Badge>;
+        return (
+          <span className={`${baseClass} medal-default`}>
+            {position}º
+          </span>
+        );
     }
   };
 
-  return (
-    <Container className="mt-4">
-      <h2 className="mb-4">Ranking (mock)</h2>
+  const getRowClass = (position) => {
+    if (position === 1) return 'row-gold';
+    if (position === 2) return 'row-silver';
+    if (position === 3) return 'row-bronze';
+    return '';
+  };
 
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>Posición</th>
-            <th>Pirata</th>
-            <th>Islas Completadas</th>
-            <th>Puntuación Total</th>
-            <th>Berries</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ranking.map((u, index) => (
-            <tr key={u.id}>
-              <td>{getMedalBadge(index + 1)}</td>
-              <td><strong>{u.username}</strong></td>
-              <td>{u.completedIslands}</td>
-              <td>{u.totalScore}</td>
-              <td>{u.berries}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </Container>
+  return (
+    <div className="ranking-page-bg">
+      <div className="ranking-content-wrapper">
+        <Container className="py-5">
+          <h2 className="text-white fw-bold mb-4 title-shadow mt-5">Ranking</h2>
+
+          <Card className="ranking-glass-card border-0">
+            <Card.Header className="bg-transparent border-bottom border-white border-opacity-10 py-3 d-flex align-items-center justify-content-between">
+              <div>
+                <h5 className="text-white mb-0">Emperadores pirata (Mejores clasificados)</h5>
+                <small className="text-white-50">Clasificación global</small>
+              </div>
+            </Card.Header>
+
+            <Card.Body className="p-0">
+              <div className="table-responsive">
+                <Table hover className="ranking-table mb-0 align-middle">
+                  <thead>
+                    <tr>
+                      <th className="ps-4">Posición</th>
+                      <th>Pirata</th>
+                      <th className="text-center">Islas</th>
+                      <th className="text-center">Puntos</th>
+                      <th className="pe-4 text-end">Berries</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sorted.map((u, index) => {
+                      const pos = index + 1;
+                      return (
+                        <tr key={u.id} className={getRowClass(pos)}>
+                          <td className="ps-4">{getMedalBadge(pos)}</td>
+
+                          <td>
+                            <div className="d-flex align-items-center gap-3">
+                              <div className="rank-avatar">
+                                <img
+                                  src={u.avatar}
+                                  alt={`Avatar de ${u.username}`}
+                                />
+                              </div>
+                              <div>
+                                <div className="text-white fw-bold">{u.username}</div>
+                                <small className="text-white-50">Tripulación: Straw Hats</small>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="text-center text-white-75 fw-semibold">{u.completedIslands}</td>
+                          <td className="text-center text-white fw-bold">{u.totalScore}</td>
+
+                          <td className="pe-4 text-end">
+                            <span className="berries-pill">
+                              <span className="material-symbols-outlined berry-icon">money_bag</span>
+                              {u.berries.toLocaleString('es-ES')}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </div>
+            </Card.Body>
+          </Card>
+        </Container>
+      </div>
+    </div>
   );
 }
 

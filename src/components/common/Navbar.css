@@ -1,0 +1,101 @@
+.oqj-navbar {
+  background: rgba(7, 14, 26, 0.65);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.oqj-navbar-inner {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Brand */
+.oqj-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.oqj-brand-icon {
+  color: #d4af37;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.oqj-brand-text {
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  font-size: 0.95rem;
+  color: #d4af37;
+}
+
+.oqj-navlinks {
+  gap: 18px;
+}
+
+.oqj-link {
+  color: rgba(255, 255, 255, 0.75) !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+}
+
+.oqj-link:hover {
+  color: #d4af37 !important;
+}
+
+.oqj-cta {
+  margin-left: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.oqj-cta-btn {
+  background: transparent !important;
+  border: 1px solid rgba(212, 175, 55, 0.55) !important;
+  color: #d4af37 !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  transition: 0.2s ease;
+}
+
+.oqj-cta-btn:hover {
+  background: rgba(212, 175, 55, 0.12) !important;
+  transform: translateY(-1px);
+}
+
+.oqj-cta-btn:active {
+  transform: translateY(0);
+}
+
+/* Ajustes móviles */
+@media (max-width: 991px) {
+  .oqj-cta {
+    margin-left: 0;
+    margin-top: 12px;
+  }
+
+  .oqj-navlinks {
+    padding-top: 10px;
+  }
+}
+
+/* Tamaño y estilo de la calavera */
+.logo-skull {
+  max-width: 100px; 
+  height: auto;
+  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.5));
+  transition: transform 0.3s ease;
+}
+
+.logo-skull:hover {
+  transform: scale(1.1) rotate(-5deg); 
+}

@@ -1,0 +1,200 @@
+
+.ranking-page-bg {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  background-color: #000;
+}
+
+
+.ranking-page-bg::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://i.pinimg.com/736x/7c/a6/75/7ca6757d02e895f505027b60056c0291.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: blur(6px) brightness(0.7);
+  transform: scale(1.1);
+  z-index: 0;
+}
+
+
+.ranking-content-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+
+.ranking-glass-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(15px) saturate(180%);
+  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 25px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  overflow: hidden;
+}
+
+.ranking-table {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Cabecera */
+.ranking-table thead th {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 16px 12px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Filas */
+.ranking-table tbody tr {
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  transition: background 0.25s ease;
+}
+
+/* Hover */
+.ranking-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Texto de celdas */
+.ranking-table td {
+  color: rgba(255, 255, 255, 0.9);
+  vertical-align: middle;
+}
+
+.rank-badge {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.55rem 0.7rem;
+  border-radius: 999px;
+}
+
+.rank-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.4);
+  flex: 0 0 auto;
+}
+
+.rank-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.berries-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+}
+
+/* Ligero refuerzo visual para el #1 */
+.row-gold td {
+  font-weight: 600;
+}
+
+.title-shadow {
+  text-shadow: 0 8px 20px rgba(0, 0, 0, 0.55);
+}
+
+.text-white-75 {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.ranking-table {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.ranking-table th,
+.ranking-table td {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+.ranking-table tbody tr {
+  background: rgba(0, 0, 0, 0.28) !important;
+}
+
+/* hover */
+.ranking-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.ranking-table thead th {
+  background: rgba(0, 0, 0, 0.40) !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.ranking-table.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background: rgba(0, 0, 0, 0.32) !important;
+}
+
+.medal-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.medal-icon .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* Oro */
+.medal-gold {
+  background: rgba(212, 175, 55, 0.22);
+  color: #d4af37;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+}
+
+/* Plata */
+.medal-silver {
+  background: rgba(192, 192, 192, 0.22);
+  color: #cfcfcf;
+  border: 1px solid rgba(192, 192, 192, 0.45);
+}
+
+/* Bronce */
+.medal-bronze {
+  background: rgba(205, 127, 50, 0.22);
+  color: #cd7f32;
+  border: 1px solid rgba(205, 127, 50, 0.45);
+}
+
+.medal-default {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.berry-icon {
+  font-size: 20px;
+  color: #f5c542;
+}

@@ -1,0 +1,80 @@
+
+
+.one-piece-bg {
+  position: relative;
+  padding-bottom: 110px;
+  min-height: 100vh;
+  /* Sustituye 'wallpaper.jpg' por el nombre real de tu imagen en la carpeta public */
+  background-image: url('https://images6.alphacoders.com/911/thumb-1920-911401.jpg'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+}
+
+/* Efecto Blurry Glass Reforzado */
+.glass-card-extreme {
+  background: rgba(255, 255, 255, 0.1) !important; /* Fondo muy sutil */
+  backdrop-filter: blur(20px) saturate(180%); /* Desenfoque intenso estilo Figma */
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 30px !important;
+  color: white;
+}
+
+/* Personalización de los Tabs para que contrasten con el fondo oscuro/blurry */
+.custom-tabs-glass {
+  border: none !important;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 15px;
+  padding: 5px;
+}
+
+.custom-tabs-glass .nav-link {
+  color: rgba(255, 255, 255, 0.7) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.custom-tabs-glass .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para los inputs dentro del cristal */
+.glass-card-extreme input.form-control {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  border-radius: 12px;
+}
+
+.glass-card-extreme input.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Botón principal (ajusta esto en tus componentes LoginForm/RegisterForm si puedes) */
+.glass-card-extreme .btn-primary {
+  background: linear-gradient(45deg, #b21f1f, #fdbb2d) !important;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.home-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  
+
+  width: 100%;
+  padding: 32px 0;
+  background: rgba(255, 255, 255, 0.1) !important; /* Fondo muy sutil */
+  backdrop-filter: blur(20px) saturate(180%); /* Desenfoque intenso estilo Figma */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}

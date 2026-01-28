@@ -1,4 +1,4 @@
-// Provisional:
+
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
@@ -19,28 +19,28 @@ function InteractiveMap() {
         name: 'Isla del Amanecer',
         description: 'El lugar donde todo comenzó.',
         position: 1,
-        imageUrl: 'https://via.placeholder.com/600x400?text=Isla+1',
+        imageUrl: 'https://i.pinimg.com/originals/28/19/45/281945e347ded39b4f77cdc33cd98fca.jpg',
       },
       {
         id: 'island-2',
-        name: 'Shells Town',
-        description: 'Base de la Marina y comienzo del viaje.',
+        name: 'Wano',
+        description: 'Un país samurái lleno de misterios.',
         position: 2,
-        imageUrl: 'https://via.placeholder.com/600x400?text=Isla+2',
+        imageUrl: 'https://i.pinimg.com/736x/43/eb/18/43eb18dbf73bf8e5a940e363e2d4253b.jpg',
       },
       {
         id: 'island-3',
-        name: 'Orange Town',
-        description: 'Un payaso peligroso anda suelto…',
+        name: 'Elbaf',
+        description: 'Tierra de gigantes y leyendas.',
         position: 3,
-        imageUrl: 'https://via.placeholder.com/600x400?text=Isla+3',
+        imageUrl: 'https://i.pinimg.com/736x/39/33/68/3933684eeebddd5dc02e307b31dcf9d7.jpg',
       },
       {
         id: 'island-4',
-        name: 'Villa Syrup',
-        description: 'Mentiras, valor… y un tirador.',
+        name: 'Water 7',
+        description: 'Ciudad de los carpinteros y los canales.',
         position: 4,
-        imageUrl: 'https://via.placeholder.com/600x400?text=Isla+4',
+        imageUrl: 'https://i.pinimg.com/736x/16/f3/dd/16f3dd225012310cde7639af3d196095.jpg',
       },
     ],
     []
@@ -93,30 +93,27 @@ function InteractiveMap() {
     return 'locked';
   };
 
-  if (loading) {
+ if (loading) {
     return (
-      <Container className="text-center mt-5">
-        <Spinner animation="border" role="status">
+      <div className="d-flex justify-content-center align-items-center min-vh-100">
+        <Spinner animation="border" variant="light" role="status">
           <span className="visually-hidden">Cargando...</span>
         </Spinner>
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container className="mt-5">
-        <Alert variant="danger">{error}</Alert>
-      </Container>
+      </div>
     );
   }
 
   return (
-    <Container className="map-container mt-4">
-      <h2 className="text-center mb-4">Tu Viaje</h2>
+    <Container className="map-content py-5">
+      
+      <h2 className="text-center mb-5 fw-bold text-white title-shadow mt-5">
+        ¡Hora de viajar!
+      </h2>
+      
       <Row className="justify-content-center">
         {islands.map((island) => (
           <Col key={island.id} xs={12} sm={6} md={4} lg={3} className="mb-4">
+            
             <IslandNode island={island} status={getIslandStatus(island)} />
           </Col>
         ))}

@@ -1,172 +1,3 @@
-/*
-Lo de la guía:
-import React, { useState, useEffect } from 'react';
-import { Card, ListGroup, Button, ProgressBar, Alert, Spinner } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
-import './QuizView.css';
-
-function QuizView({ islandId }) {
-  const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [score, setScore] = useState(0);
-  const [showResult, setShowResult] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const response = await api.get(`/quiz/islands/${islandId}/questions`);
-        setQuestions(response.data);
-      } catch (err) {
-        setError('Error al cargar las preguntas. Por favor, intenta de nuevo.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchQuestions();
-  }, [islandId]);
-
-  const handleAnswerClick = (answer) => {
-    if (selectedAnswer) return; // Prevenir múltiples clics
-
-    setSelectedAnswer(answer);
-
-    // Verificar si la respuesta es correcta
-    // Nota: En un entorno real, esta verificación debería hacerse en el backend
-    // Aquí asumimos que podemos verificar comparando con las opciones
-    const currentQuestion = questions[currentQuestionIndex];
-    const isCorrect = answer === currentQuestion.correctAnswer;
-
-    if (isCorrect) {
-      setScore(score + 1);
-    }
-
-    // Avanzar a la siguiente pregunta después de un breve delay
-    setTimeout(() => {
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(currentQuestionIndex + 1);
-        setSelectedAnswer(null);
-      } else {
-        finishQuiz(isCorrect ? score + 1 : score);
-      }
-    }, 1500);
-  };
-
-  const finishQuiz = async (finalScore) => {
-    try {
-      await api.post(`/quiz/islands/${islandId}/score`, {
-        score: finalScore,
-      });
-      setShowResult(true);
-    } catch (err) {
-      setError('Error al guardar la puntuación.');
-      console.error(err);
-    }
-  };
-
-  const handleBackToMap = () => {
-    navigate('/mapa');
-  };
-
-  if (loading) {
-    return (
-      <div className="text-center mt-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Cargando preguntas...</span>
-        </Spinner>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <Alert variant="danger">{error}</Alert>;
-  }
-
-  if (showResult) {
-    const percentage = ((score / questions.length) * 100).toFixed(0);
-    const passed = score >= questions.length * 0.6;
-
-    return (
-      <Card className="quiz-result-card">
-        <Card.Body className="text-center">
-          <h2>{passed ? '¡Felicidades!' : '¡Buen intento!'}</h2>
-          <h3 className="mt-4">
-            Puntuación: {score}/{questions.length} ({percentage}%)
-          </h3>
-          <p className="mt-3">
-            {passed
-              ? '¡Has completado esta isla! Ahora puedes avanzar a la siguiente.'
-              : 'Necesitas al menos 60% para completar la isla. ¡Inténtalo de nuevo!'}
-          </p>
-          <Button variant="primary" size="lg" onClick={handleBackToMap} className="mt-4">
-            Volver al Mapa
-          </Button>
-        </Card.Body>
-      </Card>
-    );
-  }
-
-  const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-
-  const getAnswerClass = (option) => {
-    if (!selectedAnswer) return '';
-    
-    // Nota: Esta lógica asume que tenemos acceso a correctAnswer en el frontend
-    // En producción, esto debería manejarse diferente por seguridad
-    if (option === currentQuestion.correctAnswer) {
-      return 'list-group-item-success';
-    }
-    if (option === selectedAnswer && option !== currentQuestion.correctAnswer) {
-      return 'list-group-item-danger';
-    }
-    return '';
-  };
-
-  return (
-    <div className="quiz-container">
-      <ProgressBar now={progress} label={`${currentQuestionIndex + 1}/${questions.length}`} className="mb-4" />
-      
-      <Card>
-        <Card.Header>
-          <h4>Pregunta {currentQuestionIndex + 1}</h4>
-        </Card.Header>
-        <Card.Body>
-          <Card.Title className="mb-4">{currentQuestion.questionText}</Card.Title>
-          <ListGroup>
-            {['optionA', 'optionB', 'optionC', 'optionD'].map((optionKey) => (
-              <ListGroup.Item
-                key={optionKey}
-                action
-                onClick={() => handleAnswerClick(currentQuestion[optionKey])}
-                className={getAnswerClass(currentQuestion[optionKey])}
-                disabled={selectedAnswer !== null}
-              >
-                {currentQuestion[optionKey]}
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        </Card.Body>
-      </Card>
-      
-      <div className="text-center mt-3">
-        <p>Puntuación actual: {score}</p>
-      </div>
-    </div>
-  );
-}
-
-export default QuizView;
-
-*/
-
-// Provisional:
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { Card, ListGroup, Button, ProgressBar, Alert, Spinner } from 'react-bootstrap';
@@ -297,18 +128,14 @@ function QuizView({ islandId }) {
     setShowResult(false);
   };
 
-  if (loading) {
+ if (loading) {
     return (
       <div className="text-center mt-5">
-        <Spinner animation="border" role="status">
+        <Spinner animation="border" variant="light" role="status">
           <span className="visually-hidden">Cargando preguntas...</span>
         </Spinner>
       </div>
     );
-  }
-
-  if (error) {
-    return <Alert variant="danger">{error}</Alert>;
   }
 
   if (showResult) {
@@ -316,25 +143,19 @@ function QuizView({ islandId }) {
     const passed = score >= questions.length * 0.6;
 
     return (
-      <Card className="quiz-result-card">
-        <Card.Body className="text-center">
-          <h2>{passed ? '¡Felicidades!' : '¡Buen intento!'}</h2>
-          <h3 className="mt-4">
-            Puntuación: {score}/{questions.length} ({percentage}%)
-          </h3>
-          <p className="mt-3">
-            {passed
-              ? 'Has completado la isla (mock).'
-              : 'Necesitas al menos 60% para completarla (mock).'}
+      <Card className="quiz-glass-card text-center animate__animated animate__fadeIn">
+        <Card.Body className="p-5">
+          <h2 className="text-white fw-bold">{passed ? '🎊 ¡Misión Cumplida!' : '☠️ ¡A pique!'}</h2>
+          <div className="score-circle my-4">
+            <h3 className="mb-0">{score}/{questions.length}</h3>
+            <small>{percentage}%</small>
+          </div>
+          <p className="text-light fs-5">
+            {passed ? 'Has conquistado esta isla.' : 'Tu barco necesita reparaciones. ¡Reinténtalo!'}
           </p>
-
-          <div className="d-flex justify-content-center gap-2 mt-4">
-            <Button variant="primary" onClick={handleBackToMap}>
-              Volver al Mapa
-            </Button>
-            <Button variant="outline-secondary" onClick={handleRetry}>
-              Reintentar
-            </Button>
+          <div className="d-flex justify-content-center gap-3 mt-4">
+            <Button variant="warning" className="fw-bold px-4" onClick={handleBackToMap}>Volver al Mapa</Button>
+            <Button variant="outline-light" onClick={handleRetry}>Reintentar</Button>
           </div>
         </Card.Body>
       </Card>
@@ -342,48 +163,58 @@ function QuizView({ islandId }) {
   }
 
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-
-  const getAnswerClass = (option) => {
-    if (!selectedAnswer) return '';
-    if (option === currentQuestion.correctAnswer) return 'list-group-item-success';
-    if (option === selectedAnswer && option !== currentQuestion.correctAnswer) return 'list-group-item-danger';
-    return '';
-  };
+  const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   return (
-    <div className="quiz-container">
-      <ProgressBar
-        now={progress}
-        label={`${currentQuestionIndex + 1}/${questions.length}`}
-        className="mb-4"
-      />
+    <div className="quiz-view-container">
+      {/* Barra de progreso personalizada */}
+      <div className="progress-container mb-4 mt-5">
+        <div className="d-flex justify-content-between text-white mb-2 small fw-bold">
+          <span>PROGRESO</span>
+          <span>{currentQuestionIndex + 1} / {questions.length}</span>
+        </div>
+        <ProgressBar now={progressPercentage} className="quiz-progress-bar" />
+      </div>
 
-      <Card>
-        <Card.Header>
-          <h4>Pregunta {currentQuestionIndex + 1}</h4>
+      <Card className="quiz-glass-card border-0">
+        <Card.Header className="bg-transparent border-bottom border-white border-opacity-10 py-3">
+          <h5 className="text-white-50 mb-0">PREGUNTA {currentQuestionIndex + 1}</h5>
         </Card.Header>
-        <Card.Body>
-          <Card.Title className="mb-4">{currentQuestion.questionText}</Card.Title>
+        <Card.Body className="p-4 p-md-5">
+          <Card.Title className="text-white fs-3 mb-5 text-center">
+            {currentQuestion.questionText}
+          </Card.Title>
 
-          <ListGroup>
-            {['optionA', 'optionB', 'optionC', 'optionD'].map((key) => (
-              <ListGroup.Item
-                key={key}
-                action
-                onClick={() => handleAnswerClick(currentQuestion[key])}
-                className={getAnswerClass(currentQuestion[key])}
-                disabled={selectedAnswer !== null}
-              >
-                {currentQuestion[key]}
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
+          <div className="options-grid">
+            {['optionA', 'optionB', 'optionC', 'optionD'].map((key) => {
+              const optionValue = currentQuestion[key];
+              const isSelected = selectedAnswer === optionValue;
+              const isCorrect = optionValue === currentQuestion.correctAnswer;
+              
+              let statusClass = '';
+              if (selectedAnswer) {
+                if (isCorrect) statusClass = 'correct';
+                else if (isSelected) statusClass = 'incorrect';
+                else statusClass = 'dimmed';
+              }
+
+              return (
+                <div 
+                  key={key} 
+                  className={`quiz-option ${statusClass}`}
+                  onClick={() => handleAnswerClick(optionValue)}
+                >
+                  <span className="option-letter">{key.slice(-1)}</span>
+                  {optionValue}
+                </div>
+              );
+            })}
+          </div>
         </Card.Body>
       </Card>
-
-      <div className="text-center mt-3">
-        <p>Puntuación actual: {score}</p>
+      
+      <div className="text-center mt-4 text-white-50">
+         Puntuación actual: <span className="text-warning fw-bold">{score}</span>
       </div>
     </div>
   );
