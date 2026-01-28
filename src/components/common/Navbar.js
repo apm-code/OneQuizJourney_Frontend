@@ -41,13 +41,13 @@ function Navbar() {
             {user && (
               <>
                 <Nav.Link as={Link} to="/mapa" className="oqj-link">
-                  Map
+                  Mapa
                 </Nav.Link>
                 <Nav.Link as={Link} to="/ranking" className="oqj-link">
                   Ranking
                 </Nav.Link>
                 <Nav.Link as={Link} to="/perfil" className="oqj-link">
-                  Profile
+                  Perfil
                 </Nav.Link>
               </>
             )}
@@ -56,7 +56,7 @@ function Navbar() {
           <div className="oqj-cta">
             {user ? (
               <Button className="oqj-cta-btn" onClick={handleLogout}>
-                LOG OUT
+                Desconectar
               </Button>
             ) : (
               <Button className="oqj-cta-btn" onClick={handleJoinFleet}>

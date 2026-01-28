@@ -139,13 +139,14 @@ function QuizView({ islandId }) {
   }
 
   if (showResult) {
-    const percentage = ((score / questions.length) * 100).toFixed(0);
-    const passed = score >= questions.length * 0.6;
+  const percentage = ((score / questions.length) * 100).toFixed(0);
+  const passed = score >= questions.length * 0.6;
 
-    return (
+  return (
+    <div className="quiz-view-container">
       <Card className="quiz-glass-card text-center animate__animated animate__fadeIn">
         <Card.Body className="p-5">
-          <h2 className="text-white fw-bold">{passed ? '🎊 ¡Misión Cumplida!' : '☠️ ¡A pique!'}</h2>
+          <h2 className="text-white fw-bold">{passed ? ' ¡Misión Cumplida!' : '☠️ ¡A pique!'}</h2>
           <div className="score-circle my-4">
             <h3 className="mb-0">{score}/{questions.length}</h3>
             <small>{percentage}%</small>
@@ -154,13 +155,16 @@ function QuizView({ islandId }) {
             {passed ? 'Has conquistado esta isla.' : 'Tu barco necesita reparaciones. ¡Reinténtalo!'}
           </p>
           <div className="d-flex justify-content-center gap-3 mt-4">
-            <Button variant="warning" className="fw-bold px-4" onClick={handleBackToMap}>Volver al Mapa</Button>
+            <Button variant="warning" className="fw-bold px-4" onClick={handleBackToMap}>
+              Volver al Mapa
+            </Button>
             <Button variant="outline-light" onClick={handleRetry}>Reintentar</Button>
           </div>
         </Card.Body>
       </Card>
-    );
-  }
+    </div>
+  );
+}
 
   const currentQuestion = questions[currentQuestionIndex];
   const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;

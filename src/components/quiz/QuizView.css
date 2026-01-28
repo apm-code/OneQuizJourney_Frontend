@@ -69,3 +69,9 @@
 .quiz-progress-bar .progress-bar {
   background: linear-gradient(90deg, #ffc107, #ff9800) !important;
 }
+
+.quiz-view-container{
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 110px 16px 40px; /* 👈 110 = navbar + aire. Ajusta si quieres */
+}

@@ -9,9 +9,9 @@ import aceAvatar from '../assets/ace.jpg.webp';
 
 function RankingPage() {
   const ranking = [
-    { id: 'u1', username: 'Luffy', completedIslands: 10, totalScore: 80, berries: 3000, avatar: luffyAvatar },
+    { id: 'u1', username: 'Luffy', completedIslands: 10, totalScore: 80, berries: 5000, avatar: luffyAvatar },
     { id: 'u2', username: 'Zoro', completedIslands: 9, totalScore: 75, berries: 2500, avatar: zoroAvatar },
-    { id: 'u3', username: 'Sanji', completedIslands: 8, totalScore: 70, berries: 5000, avatar: sanjiAvatar },
+    { id: 'u3', username: 'Sanji', completedIslands: 8, totalScore: 70, berries: 1500, avatar: sanjiAvatar },
     { id: 'u4', username: 'Adri', completedIslands: 1, totalScore: 7, berries: 0, avatar: aceAvatar },
   ];
 

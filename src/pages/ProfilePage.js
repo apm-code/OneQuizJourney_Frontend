@@ -8,7 +8,7 @@ function ProfilePage() {
 
   const progress = [
     { id: 'p1', islandName: 'Isla del Amanecer', completed: true, score: 7, attempts: 1 },
-    { id: 'p2', islandName: 'Shells Town', completed: false, score: 1, attempts: 2 },
+    { id: 'p2', islandName: 'Wano', completed: false, score: 1, attempts: 2 },
   ];
 
   const completedIslands = progress.filter((p) => p.completed).length;
