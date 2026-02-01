@@ -4,10 +4,11 @@ import { Card, ListGroup, Button, ProgressBar, Alert, Spinner } from 'react-boot
 import { useNavigate } from 'react-router-dom';
 import './QuizView.css';
 
+// Función que gestiona el funcionamiento del quiz
 function QuizView({ islandId }) {
   const navigate = useNavigate();
 
-  // MOCK: preguntas por isla (puedes añadir más)
+  // MOCK: preguntas por isla. Puestas hasta conectar con backend
   const mockQuestionsByIsland = useMemo(
     () => ({
       'island-1': [
@@ -63,6 +64,7 @@ function QuizView({ islandId }) {
     []
   );
 
+  // Estado del quiz
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -71,6 +73,7 @@ function QuizView({ islandId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Cada vez que cambia islandId, se reinicia el quiz y cargan sus preguntas
   useEffect(() => {
     setLoading(true);
     setError('');
@@ -79,7 +82,6 @@ function QuizView({ islandId }) {
     setSelectedAnswer(null);
     setScore(0);
 
-    // Simula “fetch”
     const t = setTimeout(() => {
       const qs = mockQuestionsByIsland[islandId] || [];
       if (qs.length === 0) {
@@ -93,6 +95,7 @@ function QuizView({ islandId }) {
     return () => clearTimeout(t);
   }, [islandId, mockQuestionsByIsland]);
 
+  // Maneja la selección de respuesta
   const handleAnswerClick = (answer) => {
     if (selectedAnswer) return; // evita doble click
 
@@ -105,6 +108,7 @@ function QuizView({ islandId }) {
       setScore((prev) => prev + 1);
     }
 
+    // Delay para mostrar el feedback visual antes de pasar a la siguiente pregunta
     setTimeout(() => {
       const isLast = currentQuestionIndex >= questions.length - 1;
 
@@ -128,16 +132,7 @@ function QuizView({ islandId }) {
     setShowResult(false);
   };
 
- if (loading) {
-    return (
-      <div className="text-center mt-5">
-        <Spinner animation="border" variant="light" role="status">
-          <span className="visually-hidden">Cargando preguntas...</span>
-        </Spinner>
-      </div>
-    );
-  }
-
+  // Muestra el resultado final
   if (showResult) {
   const percentage = ((score / questions.length) * 100).toFixed(0);
   const passed = score >= questions.length * 0.6;
@@ -158,7 +153,9 @@ function QuizView({ islandId }) {
             <Button variant="warning" className="fw-bold px-4" onClick={handleBackToMap}>
               Volver al Mapa
             </Button>
-            <Button variant="outline-light" onClick={handleRetry}>Reintentar</Button>
+            <Button variant="outline-light" onClick={handleRetry}>
+              Reintentar
+            </Button>
           </div>
         </Card.Body>
       </Card>
@@ -166,6 +163,7 @@ function QuizView({ islandId }) {
   );
 }
 
+  // Pregunta actual y progreso del quiz
   const currentQuestion = questions[currentQuestionIndex];
   const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
 

@@ -3,13 +3,19 @@ import { Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
+// Función del formulario de sesión
 function LoginForm() {
+  // Guarda los campos del formulario:
   const [formData, setFormData] = useState({ email: '', password: '' });
+  
+  // Si el login falla, guarda el error:
   const [error, setError] = useState('');
 
+  // login viene del AuthContext: llama al backend y actualiza el estado user
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Maneja los cambios de los datos del formulario
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -17,18 +23,22 @@ function LoginForm() {
     }));
   };
 
+  // Se envía el formulario
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault(); // evita recarga de página
+    setError('');       // limpia errores previos
 
     try {
+      // Se intenta el login: si ok, AuthContext guarda el user
       await login(formData.email, formData.password);
+      // Se redirige al mapa
       navigate('/mapa');
     } catch (err) {
       setError(err.response?.data?.message || 'Error al iniciar sesión');
     }
   };
 
+  // Formulario de comprobación de datos de inicio de sesión
   return (
     <Form onSubmit={handleSubmit}>
       {error && <Alert variant="danger">{error}</Alert>}

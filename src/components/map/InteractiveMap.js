@@ -6,12 +6,12 @@ import IslandNode from './IslandNode';
 import './InteractiveMap.css';
 
 function InteractiveMap() {
-  const [islands, setIslands] = useState([]);
-  const [progress, setProgress] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error] = useState('');
+  const [islands, setIslands] = useState([]);   // Lista de islas a mostrar
+  const [progress, setProgress] = useState([]); // Progreso del usuario
+  const [loading, setLoading] = useState(true); // Indica si se está cargando una isla o el progreso
+  const [error] = useState('');                 // De momento, no muestra error. Se modificará al conectar el backend
 
-  // MOCK: islas
+  // Islas cargadas como mock hasta conectar con el back
   const mockIslands = useMemo(
     () => [
       {
@@ -46,7 +46,7 @@ function InteractiveMap() {
     []
   );
 
-  // MOCK: progreso del usuario (simula que completó la isla 1)
+  // MOCK: simula el progreso del usuario (simula que completó la isla 1)
   const mockProgress = useMemo(
     () => [
       {
@@ -61,7 +61,7 @@ function InteractiveMap() {
   );
 
   useEffect(() => {
-    // Simula carga
+    // Simula una petición HTTP
     const t = setTimeout(() => {
       try {
         setIslands(mockIslands);
@@ -81,27 +81,21 @@ function InteractiveMap() {
   const getIslandStatus = (island) => {
     const islandProgress = progress.find((p) => p.islandId === island.id);
 
-    if (islandProgress?.completed) return 'completed';
+    if (islandProgress?.completed)  // Si está completada, estado completed
+      return 'completed';
 
-    if (island.position === 1) return 'available';
+    if (island.position === 1)      // La primera isla siempre está disponible
+      return 'available';
 
+    // Si la isla anterior está completada, la siguiente se desbloquea
     const previousIsland = islands.find((i) => i.position === island.position - 1);
     const previousProgress = progress.find((p) => p.islandId === previousIsland?.id);
 
-    if (previousProgress?.completed) return 'available';
+    if (previousProgress?.completed)
+      return 'available';
 
     return 'locked';
   };
-
- if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center min-vh-100">
-        <Spinner animation="border" variant="light" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </Spinner>
-      </div>
-    );
-  }
 
   return (
     <Container className="map-content py-5">
