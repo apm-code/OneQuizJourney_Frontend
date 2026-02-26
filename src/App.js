@@ -27,25 +27,30 @@ function App() {
     <Router>
       {/* AuthProvider hace que toda la app tenga acceso a la autenticación */}
       <AuthProvider>
-        {/* Navbar se muestra en todas las páginas (siempre visible) */}
-        <Navbar />
-        {/* Routes agrupa todas las rutas definidas */}
-        <Routes>
-          {/* Ruta pública: accesible sin iniciar sesión */}
-          <Route path="/" element={<HomePage />} />
+        <div className="app-shell">
+          {/* Navbar se muestra en todas las páginas (siempre visible) */}
+          <Navbar />
+          <main className="app-main">
+            {/* Routes agrupa todas las rutas definidas */}
+            <Routes>
+              {/* Ruta pública: accesible sin iniciar sesión */}
+              <Route path="/" element={<HomePage />} />
 
-          {/* Ruta protegida: solo accesible si user existe */}
-          <Route path="/mapa" element={ <ProtectedRoute> <MapPage /> </ProtectedRoute>}/>
+              {/* Ruta protegida: solo accesible si user existe */}
+              <Route path="/mapa" element={ <ProtectedRoute> <MapPage /> </ProtectedRoute>}/>
 
-          {/* Ruta protegida con parámetro dinámico :islandId */}
-          <Route path="/quiz/:islandId" element={ <ProtectedRoute> <QuizPage /> </ProtectedRoute>} />
+              {/* Ruta protegida con parámetro dinámico :islandId */}
+              <Route path="/quiz/:islandId" element={ <ProtectedRoute> <QuizPage /> </ProtectedRoute>} />
 
-          {/* Ruta protegida: perfil del usuario */}
-          <Route path="/perfil" element={ <ProtectedRoute> <ProfilePage /> </ProtectedRoute>} />
-          
-          {/* Ruta protegida: ranking global */}
-          <Route path="/ranking" element={ <ProtectedRoute> <RankingPage /> </ProtectedRoute>} />
-        </Routes>
+              {/* Ruta protegida: perfil del usuario */}
+              <Route path="/perfil" element={ <ProtectedRoute> <ProfilePage /> </ProtectedRoute>} />
+              
+              {/* Ruta protegida: ranking global */}
+              <Route path="/ranking" element={ <ProtectedRoute> <RankingPage /> </ProtectedRoute>} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
       </AuthProvider>
     </Router>
   );
