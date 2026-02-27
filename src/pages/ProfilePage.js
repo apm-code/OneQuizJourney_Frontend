@@ -3,8 +3,17 @@ import { Container, Card, Row, Col, Badge, Spinner, Alert } from 'react-bootstra
 import { useAuth } from '../context/AuthContext';
 import './ProfilePage.css';
 import { CHARACTER_IMAGE_KEYS, getCharacterImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../utils/imagePaths';
-import { getProgress } from '../services/quiz.api';
+import { getProgress, getMyCards } from '../services/quiz.api';
 import api from '../services/api';
+
+// Devuelve la variante Bootstrap para el badge según la rareza de la carta
+const rarityVariant = (rarity) => {
+  if (!rarity) return 'secondary';
+  const r = rarity.toLowerCase();
+  if (r === 'legendary') return 'warning';
+  if (r === 'rare') return 'info';
+  return 'secondary';
+};
 
 function ProfilePage() {
   const { user, refreshProfile } = useAuth(); // Cogemos el usuario (si ya está logueado) y la función para refrescar el perfil desde el backend
@@ -14,6 +23,11 @@ function ProfilePage() {
   // Estados de carga y error general (progreso)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Estados del álbum de cartas
+  const [cards, setCards] = useState([]);
+  const [cardsLoading, setCardsLoading] = useState(true);
+  const [cardsError, setCardsError] = useState('');
 
   // Estados relacionados con el cambio de avatar
   const [avatarSaving, setAvatarSaving] = useState(false); // Indica si se está guardando el avatar
@@ -110,6 +124,31 @@ function ProfilePage() {
       setAvatarSaving(false); // Terminamos el guardado
     }
   };
+
+  // useEffect: carga las cartas del usuario
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCards = async () => {
+      try {
+        setCardsLoading(true);
+        setCardsError('');
+        const cardsData = await getMyCards();
+        if (mounted) setCards(Array.isArray(cardsData) ? cardsData : []);
+      } catch (err) {
+        if (mounted) {
+          setCardsError(err.response?.data?.message || 'No se pudieron cargar las cartas.');
+          setCards([]);
+        }
+      } finally {
+        if (mounted) setCardsLoading(false);
+      }
+    };
+
+    loadCards();
+
+    return () => { mounted = false; };
+  }, []);
 
   // useMemo: transforma el progreso en un formato más "limpio" y fácil de usar en la vista
   // Se recalcula solo cuando cambia "progress"
@@ -290,6 +329,67 @@ function ProfilePage() {
                 </Col>
               ))}
             </Row>
+          </Card.Body>
+        </Card>
+
+        {/* Álbum de cartas */}
+        <Card className="profile-glass-card border-0 mt-4">
+          <Card.Header className="bg-transparent border-bottom border-white border-opacity-10 py-3 d-flex align-items-center gap-2">
+            <h5 className="text-white mb-0">Álbum de Cartas</h5>
+            <Badge bg="warning" text="dark">{cards.length}</Badge>
+          </Card.Header>
+
+          <Card.Body>
+            {/* Loading de cartas */}
+            {cardsLoading && (
+              <div className="text-center py-3">
+                <Spinner animation="border" variant="light" />
+              </div>
+            )}
+
+            {/* Error al cargar cartas */}
+            {!cardsLoading && cardsError && <Alert variant="danger">{cardsError}</Alert>}
+
+            {/* Sin cartas aún */}
+            {!cardsLoading && !cardsError && cards.length === 0 && (
+              <div className="text-center py-4">
+                <p className="text-white-50 mb-1">Tu álbum está vacío</p>
+                <small className="text-white-50">Completa una isla con el 100% de aciertos para ganar tu primera carta</small>
+              </div>
+            )}
+
+            {/* Grid de cartas */}
+            {!cardsLoading && !cardsError && cards.length > 0 && (
+              <Row className="g-3">
+                {cards.map((card) => (
+                  <Col xs={6} sm={4} md={3} key={card.userCardId}>
+                    <div className="album-card">
+                      <img
+                        src={card.imageUrl}
+                        alt={card.name}
+                        className="album-card-img"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          const step = img.dataset.fallbackStep || '0';
+                          if (step === '0') { img.dataset.fallbackStep = '1'; img.src = PLACEHOLDER_IMAGE; return; }
+                          img.onerror = null; img.src = SAFE_FALLBACK_IMAGE;
+                        }}
+                      />
+                      <div className="album-card-body">
+                        <p className="album-card-name">{card.name}</p>
+                        {card.title && <small className="album-card-title">{card.title}</small>}
+                        <Badge bg={rarityVariant(card.rarity)} className="mt-1">{card.rarity}</Badge>
+                        {card.bounty && (
+                          <small className="d-block text-warning mt-1">
+                            {Number(card.bounty).toLocaleString('es-ES')} <span className="text-white-50">berries</span>
+                          </small>
+                        )}
+                      </div>
+                    </div>
+                  </Col>
+                ))}
+              </Row>
+            )}
           </Card.Body>
         </Card>
 
