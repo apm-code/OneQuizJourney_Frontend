@@ -1,175 +1,212 @@
-
-import React, { useEffect, useMemo, useState } from 'react';
-import { Card, ListGroup, Button, ProgressBar, Alert, Spinner } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Card, Button, ProgressBar, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { getQuestionsByIsland, submitScore, validateAnswer } from '../../services/quiz.api';
 import './QuizView.css';
 
-// Función que gestiona el funcionamiento del quiz
+// Componente que gestiona el quiz de una isla concreta
 function QuizView({ islandId }) {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Sirve para navegar a otras rutas (por ejemplo volver al mapa)
 
-  // MOCK: preguntas por isla. Puestas hasta conectar con backend
-  const mockQuestionsByIsland = useMemo(
-    () => ({
-      'island-1': [
-        {
-          id: 'q1',
-          questionText: '¿Quién le dio a Luffy su sombrero de paja?',
-          optionA: 'Gol D. Roger',
-          optionB: 'Shanks',
-          optionC: 'Rayleigh',
-          optionD: 'Ace',
-          correctAnswer: 'Shanks',
-        },
-        {
-          id: 'q2',
-          questionText: '¿Qué fruta del diablo comió Luffy?',
-          optionA: 'Mera Mera no Mi',
-          optionB: 'Ope Ope no Mi',
-          optionC: 'Gomu Gomu no Mi',
-          optionD: 'Bara Bara no Mi',
-          correctAnswer: 'Gomu Gomu no Mi',
-        },
-        {
-          id: 'q3',
-          questionText: '¿Quién fue la primera persona que Luffy reclutó?',
-          optionA: 'Nami',
-          optionB: 'Usopp',
-          optionC: 'Roronoa Zoro',
-          optionD: 'Sanji',
-          correctAnswer: 'Roronoa Zoro',
-        },
-      ],
-      'island-2': [
-        {
-          id: 'q1',
-          questionText: '¿Cómo se llama el capitán con mandíbula de acero?',
-          optionA: 'Smoker',
-          optionB: 'Morgan',
-          optionC: 'Garp',
-          optionD: 'Koby',
-          correctAnswer: 'Morgan',
-        },
-        {
-          id: 'q2',
-          questionText: '¿Dónde estaba la base de la Marina al inicio?',
-          optionA: 'Marineford',
-          optionB: 'Sucursal 153',
-          optionC: 'G-5',
-          optionD: 'Enies Lobby',
-          correctAnswer: 'Sucursal 153',
-        },
-      ],
-    }),
-    []
-  );
+  // Estados principales del quiz
+  const [questions, setQuestions] = useState([]); // Preguntas de la isla
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); // Índice de la pregunta actual
+  const [selectedAnswer, setSelectedAnswer] = useState(null); // Respuesta seleccionada por el usuario (para evitar doble click)
+  const [isSelectedAnswerCorrect, setIsSelectedAnswerCorrect] = useState(null); // Guarda si la respuesta seleccionada fue correcta o no
+  const [score, setScore] = useState(0); // Puntuación (nº de aciertos)
+  const [showResult, setShowResult] = useState(false); // Si true, se muestra la pantalla final del resultado
+  const [loading, setLoading] = useState(true); // Loading mientras se cargan preguntas
+  const [error, setError] = useState(''); // Mensaje de error si algo falla
 
-  // Estado del quiz
-  const [questions, setQuestions] = useState([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
-  const [score, setScore] = useState(0);
-  const [showResult, setShowResult] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  // Cada vez que cambia islandId, se reinicia el quiz y cargan sus preguntas
+  // Cada vez que cambia el islandId: reiniciamos el quiz y cargamos preguntas nuevas
   useEffect(() => {
+    let mounted = true; // Bandera para evitar setState si el componente se desmonta
+
+    const loadQuestions = async () => { // Función para cargar preguntas desde el backend
+      try {
+        setLoading(true); // Activamos spinner
+        setError(''); // Limpiamos error anterior
+        setShowResult(false); // Quitamos resultado final si venimos de un intento anterior
+        setCurrentQuestionIndex(0); // Volvemos a la pregunta 1
+        setSelectedAnswer(null); // Limpiamos selección
+        setIsSelectedAnswerCorrect(null); // Limpiamos estado de correcto/incorrecto
+        setScore(0); // Puntuación a 0
+
+        // Petición al backend para traer preguntas de la isla
+        const questionsData = await getQuestionsByIsland(islandId);
+
+        // Si no hay preguntas, lanzamos un error para mostrarlo en pantalla
+        if (!questionsData || questionsData.length === 0) {
+          throw new Error('No hay preguntas para esta isla.');
+        }
+
+        // Si el componente sigue montado, guardamos preguntas en el estado
+        if (mounted) {
+          setQuestions(questionsData);
+        }
+      } catch (err) {
+        // Si hay error, guardamos mensaje y vaciamos preguntas
+        if (mounted) {
+          setError(err.response?.data?.message || err.message || 'No se pudieron cargar las preguntas.');
+          setQuestions([]);
+        }
+      } finally {
+        // Quitamos loading pase lo que pase
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadQuestions(); // Ejecuta la carga
+
+    // Cleanup: si el componente se desmonta, evitamos actualizar estados
+    return () => {
+      mounted = false;
+    };
+  }, [islandId]);
+
+  // Función que se ejecuta cuando el usuario hace click en una opción
+  const handleAnswerClick = async (answer) => {
+    if (selectedAnswer) return; // Evita doble click si ya seleccionó una respuesta
+
+    const currentQuestion = questions[currentQuestionIndex]; // Pregunta actual
+    if (!currentQuestion) return; // Seguridad por si no hay pregunta cargada
+
+    try {
+      // Llama al backend para validar si la respuesta es correcta
+      const validation = await validateAnswer(currentQuestion.id, answer);
+      const isCorrect = Boolean(validation?.isCorrect); // true/false según responda la API
+
+      // Calcula la nueva puntuación (si acierta suma 1)
+      const updatedScore = score + (isCorrect ? 1 : 0);
+
+      // Guardamos selección y si fue correcta (para colorear opciones)
+      setSelectedAnswer(answer);
+      setIsSelectedAnswerCorrect(isCorrect);
+
+      // Si es correcta, actualizamos score
+      if (isCorrect) {
+        setScore(updatedScore);
+      }
+
+      // Espera un poco para que el usuario vea el feedback (correct/incorrect)
+      setTimeout(async () => {
+        const isLast = currentQuestionIndex >= questions.length - 1; // Comprueba si es la última pregunta
+
+        // Si NO es la última, pasa a la siguiente y resetea selección
+        if (!isLast) {
+          setCurrentQuestionIndex((prev) => prev + 1);
+          setSelectedAnswer(null);
+          setIsSelectedAnswerCorrect(null);
+          return;
+        }
+
+        // Si ES la última, intenta guardar puntuación en el backend
+        try {
+          await submitScore(islandId, updatedScore);
+        } catch (submitError) {
+          console.error(submitError); // Si falla guardar, no rompemos el quiz (solo lo registramos)
+        }
+
+        // Muestra la pantalla final
+        setShowResult(true);
+      }, 900);
+    } catch (err) {
+      // Error al validar (ej: problema de red o pregunta no encontrada)
+      setError(err.response?.data?.message || 'No se pudo validar la respuesta.');
+    }
+  };
+
+  // Botón para volver al mapa
+  const handleBackToMap = () => {
+    navigate('/mapa');
+  };
+
+  // Botón para reintentar el quiz (reinicia estados)
+  const handleRetry = () => {
     setLoading(true);
     setError('');
     setShowResult(false);
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
+    setIsSelectedAnswerCorrect(null);
     setScore(0);
-
-    const t = setTimeout(() => {
-      const qs = mockQuestionsByIsland[islandId] || [];
-      if (qs.length === 0) {
-        setError('No hay preguntas para esta isla (mock).');
-      } else {
-        setQuestions(qs);
-      }
-      setLoading(false);
-    }, 250);
-
-    return () => clearTimeout(t);
-  }, [islandId, mockQuestionsByIsland]);
-
-  // Maneja la selección de respuesta
-  const handleAnswerClick = (answer) => {
-    if (selectedAnswer) return; // evita doble click
-
-    setSelectedAnswer(answer);
-
-    const currentQuestion = questions[currentQuestionIndex];
-    const isCorrect = answer === currentQuestion.correctAnswer;
-
-    if (isCorrect) {
-      setScore((prev) => prev + 1);
-    }
-
-    // Delay para mostrar el feedback visual antes de pasar a la siguiente pregunta
-    setTimeout(() => {
-      const isLast = currentQuestionIndex >= questions.length - 1;
-
-      if (!isLast) {
-        setCurrentQuestionIndex((prev) => prev + 1);
-        setSelectedAnswer(null);
-      } else {
-        setShowResult(true);
-      }
-    }, 900);
+    setLoading(false); // (ojo: aquí solo resetea, no vuelve a pedir preguntas)
   };
 
-  const handleBackToMap = () => {
-    navigate('/mapa');
-  };
+  // Si está cargando, mostramos spinner
+  if (loading) {
+    return (
+      <div className="quiz-view-container text-center py-5">
+        <Spinner animation="border" variant="light" />
+      </div>
+    );
+  }
 
-  const handleRetry = () => {
-    setCurrentQuestionIndex(0);
-    setSelectedAnswer(null);
-    setScore(0);
-    setShowResult(false);
-  };
+  // Si hay error, mostramos mensaje y botón para volver
+  if (error) {
+    return (
+      <div className="quiz-view-container">
+        <Alert variant="danger">{error}</Alert>
+        <div className="text-center mt-3">
+          <Button variant="warning" onClick={handleBackToMap}>
+            Volver al Mapa
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
-  // Muestra el resultado final
+  // Si showResult es true, mostramos el resultado final
   if (showResult) {
-  const percentage = ((score / questions.length) * 100).toFixed(0);
-  const passed = score >= questions.length * 0.6;
+    const percentage = ((score / questions.length) * 100).toFixed(0); // % de aciertos
+    const passed = score >= questions.length * 0.6; // Aprueba si acierta al menos el 60%
 
-  return (
-    <div className="quiz-view-container">
-      <Card className="quiz-glass-card text-center animate__animated animate__fadeIn">
-        <Card.Body className="p-5">
-          <h2 className="text-white fw-bold">{passed ? ' ¡Misión Cumplida!' : '☠️ ¡A pique!'}</h2>
-          <div className="score-circle my-4">
-            <h3 className="mb-0">{score}/{questions.length}</h3>
-            <small>{percentage}%</small>
-          </div>
-          <p className="text-light fs-5">
-            {passed ? 'Has conquistado esta isla.' : 'Tu barco necesita reparaciones. ¡Reinténtalo!'}
-          </p>
-          <div className="d-flex justify-content-center gap-3 mt-4">
-            <Button variant="warning" className="fw-bold px-4" onClick={handleBackToMap}>
-              Volver al Mapa
-            </Button>
-            <Button variant="outline-light" onClick={handleRetry}>
-              Reintentar
-            </Button>
-          </div>
-        </Card.Body>
-      </Card>
-    </div>
-  );
-}
+    return (
+      <div className="quiz-view-container">
+        <Card className="quiz-glass-card text-center animate__animated animate__fadeIn">
+          <Card.Body className="p-5">
+            <h2 className="text-white fw-bold">
+              {passed ? ' ¡Misión Cumplida!' : '☠️ ¡A pique!'}
+            </h2>
 
-  // Pregunta actual y progreso del quiz
-  const currentQuestion = questions[currentQuestionIndex];
+            {/* Círculo con la puntuación */}
+            <div className="score-circle my-4">
+              <h3 className="mb-0">{score}/{questions.length}</h3>
+              <small>{percentage}%</small>
+            </div>
+
+            {/* Texto según aprobado o no */}
+            <p className="text-light fs-5">
+              {passed ? 'Has conquistado esta isla.' : 'Tu barco necesita reparaciones. ¡Reinténtalo!'}
+            </p>
+
+            {/* Botones finales */}
+            <div className="d-flex justify-content-center gap-3 mt-4">
+              <Button variant="warning" className="fw-bold px-4" onClick={handleBackToMap}>
+                Volver al Mapa
+              </Button>
+              <Button variant="outline-light" onClick={handleRetry}>
+                Reintentar
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+      </div>
+    );
+  }
+
+  // Si no es resultado final, mostramos la pregunta actual
+  const currentQuestion = questions[currentQuestionIndex]; // Pregunta actual
+  if (!currentQuestion) return null; // Seguridad por si no existe
+
+  // Calcula el porcentaje de progreso para la barra (ej: pregunta 2 de 5)
   const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   return (
     <div className="quiz-view-container">
-      {/* Barra de progreso personalizada */}
+      {/* Barra de progreso arriba */}
       <div className="progress-container mb-4 mt-5">
         <div className="d-flex justify-content-between text-white mb-2 small fw-bold">
           <span>PROGRESO</span>
@@ -178,34 +215,39 @@ function QuizView({ islandId }) {
         <ProgressBar now={progressPercentage} className="quiz-progress-bar" />
       </div>
 
+      {/* Tarjeta principal del quiz */}
       <Card className="quiz-glass-card border-0">
         <Card.Header className="bg-transparent border-bottom border-white border-opacity-10 py-3">
           <h5 className="text-white-50 mb-0">PREGUNTA {currentQuestionIndex + 1}</h5>
         </Card.Header>
+
         <Card.Body className="p-4 p-md-5">
+          {/* Texto de la pregunta */}
           <Card.Title className="text-white fs-3 mb-5 text-center">
             {currentQuestion.questionText}
           </Card.Title>
 
+          {/* Opciones A, B, C, D */}
           <div className="options-grid">
             {['optionA', 'optionB', 'optionC', 'optionD'].map((key) => {
-              const optionValue = currentQuestion[key];
-              const isSelected = selectedAnswer === optionValue;
-              const isCorrect = optionValue === currentQuestion.correctAnswer;
-              
+              const optionValue = currentQuestion[key]; // Texto de esa opción (A/B/C/D)
+              const isSelected = selectedAnswer === optionValue; // Comprueba si esta opción es la seleccionada
+
+              // Clases CSS según estado:
+              // - si ha elegido: la elegida será correct/incorrect y las demás dimmed
               let statusClass = '';
               if (selectedAnswer) {
-                if (isCorrect) statusClass = 'correct';
-                else if (isSelected) statusClass = 'incorrect';
+                if (isSelected) statusClass = isSelectedAnswerCorrect ? 'correct' : 'incorrect';
                 else statusClass = 'dimmed';
               }
 
               return (
-                <div 
-                  key={key} 
-                  className={`quiz-option ${statusClass}`}
-                  onClick={() => handleAnswerClick(optionValue)}
+                <div
+                  key={key}
+                  className={`quiz-option ${statusClass}`} // Aplica clases para estilos visuales
+                  onClick={() => handleAnswerClick(optionValue)} // Valida al hacer click
                 >
+                  {/* Muestra la letra (A/B/C/D) sacándola del nombre optionX */}
                   <span className="option-letter">{key.slice(-1)}</span>
                   {optionValue}
                 </div>
@@ -214,9 +256,10 @@ function QuizView({ islandId }) {
           </div>
         </Card.Body>
       </Card>
-      
+
+      {/* Texto inferior con puntuación actual */}
       <div className="text-center mt-4 text-white-50">
-         Puntuación actual: <span className="text-warning fw-bold">{score}</span>
+        Puntuación actual: <span className="text-warning fw-bold">{score}</span>
       </div>
     </div>
   );

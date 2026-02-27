@@ -1,113 +1,104 @@
-
-
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import IslandNode from './IslandNode';
 import './InteractiveMap.css';
+import api from '../../services/api';
 
 function InteractiveMap() {
-  const [islands, setIslands] = useState([]);   // Lista de islas a mostrar
-  const [progress, setProgress] = useState([]); // Progreso del usuario
-  const [loading, setLoading] = useState(true); // Indica si se está cargando una isla o el progreso
-  const [error] = useState('');                 // De momento, no muestra error. Se modificará al conectar el backend
+  // Estados principales del componente
+  const [islands, setIslands] = useState([]);   // Lista de islas que se van a mostrar en el mapa
+  const [progress, setProgress] = useState([]); // Progreso del usuario (qué islas tiene completadas, puntuación, etc.)
+  const [loading, setLoading] = useState(true); // Indica si estamos cargando datos (islas o progreso)
+  const [error, setError] = useState('');       // Guarda un mensaje de error si falla la carga
 
-  // Islas cargadas como mock hasta conectar con el back
-  const mockIslands = useMemo(
-    () => [
-      {
-        id: 'island-1',
-        name: 'Isla del Amanecer',
-        description: 'El lugar donde todo comenzó.',
-        position: 1,
-        imageUrl: 'https://i.pinimg.com/originals/28/19/45/281945e347ded39b4f77cdc33cd98fca.jpg',
-      },
-      {
-        id: 'island-2',
-        name: 'Wano',
-        description: 'Un país samurái lleno de misterios.',
-        position: 2,
-        imageUrl: 'https://i.pinimg.com/736x/43/eb/18/43eb18dbf73bf8e5a940e363e2d4253b.jpg',
-      },
-      {
-        id: 'island-3',
-        name: 'Elbaf',
-        description: 'Tierra de gigantes y leyendas.',
-        position: 3,
-        imageUrl: 'https://i.pinimg.com/736x/39/33/68/3933684eeebddd5dc02e307b31dcf9d7.jpg',
-      },
-      {
-        id: 'island-4',
-        name: 'Water 7',
-        description: 'Ciudad de los carpinteros y los canales.',
-        position: 4,
-        imageUrl: 'https://i.pinimg.com/736x/16/f3/dd/16f3dd225012310cde7639af3d196095.jpg',
-      },
-    ],
-    []
-  );
-
-  // MOCK: simula el progreso del usuario (simula que completó la isla 1)
-  const mockProgress = useMemo(
-    () => [
-      {
-        id: 'progress-1',
-        islandId: 'island-1',
-        completed: true,
-        score: 7,
-        attempts: 1,
-      },
-    ],
-    []
-  );
-
+  // useEffect: se ejecuta una vez cuando se monta el componente (cuando se abre la pantalla)
   useEffect(() => {
-    // Simula una petición HTTP
-    const t = setTimeout(() => {
+    const loadMapData = async () => { // Función para cargar los datos necesarios del mapa
       try {
-        setIslands(mockIslands);
-        setProgress(mockProgress);
+        setLoading(true); // Activa la carga
+        setError(''); // Limpia errores anteriores
+
+        // Se piden islas y progreso a la vez para ir más rápido
+        // getIslands() y getProgress() deberían ser funciones que llamen a tu API
+        const [islandsRes, progressRes] = await Promise.all([
+          api.get('/quiz/islands'),
+          api.get('/quiz/progress'),
+        ]);
+
+        // Por seguridad se comprueba que lo recibido es un array
+        setIslands(Array.isArray(islandsRes.data) ? islandsRes.data : []);
+        setProgress(Array.isArray(progressRes.data) ? progressRes.data : []);
+
       } catch (e) {
-        // por si acaso
-        console.error(e);
+        // Si falla, mostramos el mensaje del backend si existe, o uno genérico
+        setError(e.response?.data?.message || 'No se pudo cargar el mapa.');
       } finally {
-        setLoading(false);
+        setLoading(false); // Quitamos el loading pase lo que pase (éxito o error)
       }
-    }, 300);
+    };
 
-    return () => clearTimeout(t);
-  }, [mockIslands, mockProgress]);
+    loadMapData(); // Ejecuta la carga al entrar en la pantalla
+  }, []);
 
-  // Calcular estado de una isla (completed / available / locked)
+  // Función que calcula el estado de cada isla:
+  // - completed: ya completada
+  // - available: se puede jugar (desbloqueada)
+  // - locked: bloqueada
   const getIslandStatus = (island) => {
+    // Busca si hay progreso para esa isla
     const islandProgress = progress.find((p) => p.islandId === island.id);
 
-    if (islandProgress?.completed)  // Si está completada, estado completed
+    // Si el usuario ya completó esa isla, estado "completed"
+    if (islandProgress?.completed)
       return 'completed';
 
-    if (island.position === 1)      // La primera isla siempre está disponible
+    // La primera isla siempre está disponible para empezar
+    if (island.position === 1)
       return 'available';
 
-    // Si la isla anterior está completada, la siguiente se desbloquea
+    // Si la isla anterior está completada, la actual se desbloquea
     const previousIsland = islands.find((i) => i.position === island.position - 1);
     const previousProgress = progress.find((p) => p.islandId === previousIsland?.id);
 
     if (previousProgress?.completed)
       return 'available';
 
+    // Si no cumple nada de lo anterior, queda bloqueada
     return 'locked';
   };
 
+  // Si está cargando, mostramos el spinner
+  if (loading) {
+    return (
+      <Container className="map-content py-5 text-center">
+        <Spinner animation="border" variant="light" />
+      </Container>
+    );
+  }
+
+  // Si hay error, mostramos alerta
+  if (error) {
+    return (
+      <Container className="map-content py-5">
+        <Alert variant="danger">{error}</Alert>
+      </Container>
+    );
+  }
+
+  // Si todo va bien, pintamos el mapa con las islas
   return (
     <Container className="map-content py-5">
-      
+
+      {/* Título del mapa */}
       <h2 className="text-center mb-5 fw-bold text-white title-shadow mt-5">
         ¡Hora de viajar!
       </h2>
-      
+
+      {/* Grid de islas */}
       <Row className="justify-content-center">
         {islands.map((island) => (
           <Col key={island.id} xs={12} sm={6} md={4} lg={3} className="mb-4">
-            
+            {/* IslandNode recibe la isla y su estado (locked/available/completed) */}
             <IslandNode island={island} status={getIslandStatus(island)} />
           </Col>
         ))}
