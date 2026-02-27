@@ -1,25 +1,63 @@
-import React from 'react';
-import { Container, Card, Table, Badge } from 'react-bootstrap';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Container, Card, Table, Spinner, Alert } from 'react-bootstrap';
 import './RankingPage.css';
-
-import luffyAvatar from '../assets/luffy.jpg.webp';
-import zoroAvatar from '../assets/zoro.jpg.webp';
-import sanjiAvatar from '../assets/sanji.jpg.webp';
-import aceAvatar from '../assets/ace.jpg.webp';
+import { getCharacterImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../utils/imagePaths';
+import { getRanking } from '../services/quiz.api';
 
 function RankingPage() {
-  const ranking = [
-    { id: 'u1', username: 'Luffy', completedIslands: 10, totalScore: 80, berries: 5000, avatar: luffyAvatar },
-    { id: 'u2', username: 'Zoro', completedIslands: 9, totalScore: 75, berries: 2500, avatar: zoroAvatar },
-    { id: 'u3', username: 'Sanji', completedIslands: 8, totalScore: 70, berries: 1500, avatar: sanjiAvatar },
-    { id: 'u4', username: 'Adri', completedIslands: 1, totalScore: 7, berries: 0, avatar: aceAvatar },
-  ];
+  // Estado principal del ranking
+  const [ranking, setRanking] = useState([]); // Lista de usuarios con sus stats
+  const [loading, setLoading] = useState(true); // Loading mientras se pide el ranking
+  const [error, setError] = useState(''); // Mensaje de error si falla la carga
 
-  // (Opcional) ordenamos por score desc (por si luego viene del backend sin ordenar)
-  const sorted = [...ranking].sort((a, b) => b.totalScore - a.totalScore);
+  // useEffect: al entrar en la página, se carga el ranking desde el backend
+  useEffect(() => {
+    let mounted = true; // Para evitar setState si el componente se desmonta
 
+    const loadRanking = async () => {
+      try {
+        setLoading(true);
+        setError(''); // Limpiamos error anterior
+
+        // Llamada al backend para obtener el ranking
+        const rankingData = await getRanking();
+
+        // Guardamos datos en el estado (siempre asegurando que sea un array)
+        if (mounted) {
+          setRanking(Array.isArray(rankingData) ? rankingData : []);
+        }
+      } catch (err) {
+        // Si falla, guardamos mensaje y dejamos ranking vacío
+        if (mounted) {
+          setError(err.response?.data?.message || 'No se pudo cargar el ranking.');
+          setRanking([]);
+        }
+      } finally {
+        // Quitamos loading pase lo que pase
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadRanking();
+
+    // Cleanup para evitar actualizar estado cuando ya no estamos en esta página
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Ordenamos por totalScore descendente (por si el backend no viene ordenado)
+  // useMemo evita recalcular el sort si ranking no cambia
+  const sorted = useMemo(
+    () => [...ranking].sort((a, b) => b.totalScore - a.totalScore),
+    [ranking]
+  );
+
+  // Devuelve el badge de posición (medalla para top 3)
   const getMedalBadge = (position) => {
-    const baseClass = 'rank-badge medal-icon';
+    const baseClass = 'rank-badge medal-icon'; // Clases comunes para todos los badges
 
     switch (position) {
       case 1:
@@ -44,6 +82,7 @@ function RankingPage() {
           </span>
         );
       default:
+        // Para el resto de posiciones, solo muestra el número
         return (
           <span className={`${baseClass} medal-default`}>
             {position}º
@@ -52,6 +91,7 @@ function RankingPage() {
     }
   };
 
+  // Devuelve una clase CSS según la posición (para colorear filas del top 3)
   const getRowClass = (position) => {
     if (position === 1) return 'row-gold';
     if (position === 2) return 'row-silver';
@@ -60,68 +100,123 @@ function RankingPage() {
   };
 
   return (
-    <div className="ranking-page-bg">
-      <div className="ranking-content-wrapper">
+    <div className="ranking-page-bg"> {/* Fondo general de la página */}
+      <div className="ranking-content-wrapper"> {/* Wrapper para centrar el contenido */}
         <Container className="py-5">
           <h2 className="text-white fw-bold mb-4 title-shadow mt-5">Ranking</h2>
 
           <Card className="ranking-glass-card border-0">
             <Card.Header className="bg-transparent border-bottom border-white border-opacity-10 py-3 d-flex align-items-center justify-content-between">
               <div>
-                <h5 className="text-white mb-0">Emperadores pirata (Mejores clasificados)</h5>
-                <small className="text-white-50">Clasificación global</small>
+                <h5 className="text-white mb-0">Ranking global de piratas</h5>
+                <small className="text-white-50">Se muestran todos los usuarios</small>
               </div>
             </Card.Header>
 
             <Card.Body className="p-0">
-              <div className="table-responsive">
-                <Table hover className="ranking-table mb-0 align-middle">
-                  <thead>
-                    <tr>
-                      <th className="ps-4">Posición</th>
-                      <th>Pirata</th>
-                      <th className="text-center">Islas</th>
-                      <th className="text-center">Puntos</th>
-                      <th className="pe-4 text-end">Berries</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sorted.map((u, index) => {
-                      const pos = index + 1;
-                      return (
-                        <tr key={u.id} className={getRowClass(pos)}>
-                          <td className="ps-4">{getMedalBadge(pos)}</td>
+              {/* Estado: loading */}
+              {loading && (
+                <div className="text-center py-4">
+                  <Spinner animation="border" variant="light" />
+                </div>
+              )}
 
-                          <td>
-                            <div className="d-flex align-items-center gap-3">
-                              <div className="rank-avatar">
-                                <img
-                                  src={u.avatar}
-                                  alt={`Avatar de ${u.username}`}
-                                />
+              {/* Estado: error */}
+              {!loading && error && (
+                <div className="p-3">
+                  <Alert variant="danger" className="mb-0">{error}</Alert>
+                </div>
+              )}
+
+              {/* Estado: sin datos */}
+              {!loading && !error && sorted.length === 0 && (
+                <div className="p-4 text-center text-white-50">
+                  Todavía no hay datos de ranking.
+                </div>
+              )}
+
+              {/* Estado: datos OK */}
+              {!loading && !error && sorted.length > 0 && (
+                <div className="table-responsive">
+                  <Table hover className="ranking-table mb-0 align-middle">
+                    <thead>
+                      <tr>
+                        <th className="ps-4">Posición</th>
+                        <th>Pirata</th>
+                        <th className="text-center">Islas</th>
+                        <th className="text-center">Puntos</th>
+                        <th className="pe-4 text-end">Berries</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {sorted.map((u, index) => {
+                        const pos = index + 1; // Posición real del usuario en el ranking
+                        return (
+                          <tr key={u.id} className={getRowClass(pos)}>
+                            {/* Columna posición */}
+                            <td className="ps-4">{getMedalBadge(pos)}</td>
+
+                            {/* Columna usuario + avatar */}
+                            <td>
+                              <div className="d-flex align-items-center gap-3">
+                                <div className="rank-avatar">
+                                  <img
+                                    // Usa avatar guardado; si no hay, usa uno basado en username
+                                    src={u.avatarUrl || getCharacterImagePath(u.username)}
+                                    alt={`Avatar de ${u.username}`}
+
+                                    // Fallback si la imagen falla
+                                    onError={(e) => {
+                                      const img = e.currentTarget;
+                                      const step = img.dataset.fallbackStep || '0';
+
+                                      // Primer intento: placeholder
+                                      if (step === '0') {
+                                        img.dataset.fallbackStep = '1';
+                                        img.src = PLACEHOLDER_IMAGE;
+                                        return;
+                                      }
+
+                                      // Segundo intento: imagen segura final
+                                      img.onerror = null;
+                                      img.src = SAFE_FALLBACK_IMAGE;
+                                    }}
+                                  />
+                                </div>
+
+                                {/* Texto usuario */}
+                                <div>
+                                  <div className="text-white fw-bold">{u.username}</div>
+                                  <small className="text-white-50">Tripulación: Straw Hats</small>
+                                </div>
                               </div>
-                              <div>
-                                <div className="text-white fw-bold">{u.username}</div>
-                                <small className="text-white-50">Tripulación: Straw Hats</small>
-                              </div>
-                            </div>
-                          </td>
+                            </td>
 
-                          <td className="text-center text-white-75 fw-semibold">{u.completedIslands}</td>
-                          <td className="text-center text-white fw-bold">{u.totalScore}</td>
+                            {/* Columna islas completadas */}
+                            <td className="text-center text-white-75 fw-semibold">
+                              {u.completedIslands}
+                            </td>
 
-                          <td className="pe-4 text-end">
-                            <span className="berries-pill">
-                              <span className="material-symbols-outlined berry-icon">money_bag</span>
-                              {u.berries.toLocaleString('es-ES')}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </Table>
-              </div>
+                            {/* Columna puntos totales */}
+                            <td className="text-center text-white fw-bold">
+                              {u.totalScore}
+                            </td>
+
+                            {/* Columna berries */}
+                            <td className="pe-4 text-end">
+                              <span className="berries-pill">
+                                <span className="material-symbols-outlined berry-icon">money_bag</span>
+                                {u.berries.toLocaleString('es-ES')}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </Table>
+                </div>
+              )}
             </Card.Body>
           </Card>
         </Container>
