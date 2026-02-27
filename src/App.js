@@ -1,4 +1,3 @@
-
 import React from 'react';
 // React Router: Router envuelve toda la app para habilitar navegación SPA.
 // Routes contiene el conjunto de rutas y Route define cada ruta individual.
@@ -16,7 +15,7 @@ import RankingPage from './pages/RankingPage';
 
 // Componentes comunes
 import Navbar from './components/common/Navbar';
-import Footer from './components/common/Footer'; // Actualmente, no está en toda la página
+import Footer from './components/common/Footer';
 
 // Componente que protege rutas privadas y verifica si el usuario está autenticado
 import ProtectedRoute from './components/common/ProtectedRoute';
