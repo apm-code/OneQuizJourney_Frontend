@@ -1,17 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import './HomePage.css';
-import { Container, Row, Col, Tab, Tabs, Card, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Tab, Tabs, Card, Spinner, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import LoginForm from '../components/auth/LoginForm';
 import RegisterForm from '../components/auth/RegisterForm';
-import { getPublicRanking } from '../services/quiz.api';
+import { getPublicRanking, getProgress } from '../services/quiz.api';
 import { getCharacterImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../utils/imagePaths';
+import { useAuth } from '../context/AuthContext';
 import sunnyIcon from '../assets/thousand-sunny.png';
 
 function HomePage() {
+  const { user } = useAuth();      // Usuario autenticado (null si no hay sesión)
+  const navigate = useNavigate();  // Navegación programática
+
   // Estado del ranking (top 3)
   const [topRanking, setTopRanking] = useState([]); // Lista con los 3 primeros usuarios
   const [loadingRanking, setLoadingRanking] = useState(true); // Indica si se está cargando el ranking
   const [rankingError, setRankingError] = useState(false); // Indica si hubo error al cargar el ranking
+
+  // Puntuación total del usuario (calculada desde el progreso, no viene en el perfil)
+  const [userTotalScore, setUserTotalScore] = useState(null); // null = cargando
+
+  useEffect(() => {
+    if (!user) return;
+    let mounted = true;
+    getProgress()
+      .then(data => {
+        if (mounted && Array.isArray(data)) {
+          // Suma los puntos de cada isla (igual que hace ProfilePage)
+          setUserTotalScore(data.reduce((acc, p) => acc + Number(p.score || 0), 0));
+        }
+      })
+      .catch(() => { if (mounted) setUserTotalScore(0); });
+    return () => { mounted = false; };
+  }, [user]);
 
   // useEffect: al cargar la página, pide el ranking público al backend
   useEffect(() => {
@@ -54,47 +76,128 @@ function HomePage() {
     <div className="one-piece-bg"> {/* Fondo general estilo One Piece */}
       <Container className="home-content-container">
 
-        {/* Fila principal (hero): login/registro */}
+        {/* Fila principal (hero): estadísticas si hay sesión, login/registro si no */}
         <Row className="home-hero-row">
-          <Col md={7} lg={5} className="ps-lg-5 mb-4 mb-lg-0">
-            <Card className="glass-card-extreme border-0 shadow-lg">
-              <Card.Body className="p-4 p-md-5">
 
-                {/* Cabecera: icono + título */}
-                <div className="text-center mb-4">
-                  <img
-                    src={sunnyIcon} // Icono del Thousand Sunny
-                    alt="Thousand Sunny"
-                    className="sunny-icon mb-2" // Tamaño controlado por CSS
-                  />
-                  <h1 className="fw-bold h2 text-white">One Quiz Journey</h1>
-                  <p className="text-light opacity-75">
-                    ¡Embárcate en una aventura! Inicia sesión o regístrate.
-                  </p>
-                </div>
+          {user ? (
+            /* ── USUARIO LOGUEADO: 3 tarjetas de resumen ── */
+            <Col xs={12} lg={10} className="mx-auto">
 
-                {/* Tabs: Login / Registro */}
-                <Tabs
-                  defaultActiveKey="login" // Por defecto muestra la pestaña login
-                  id="auth-tabs"
-                  className="mb-4 nav-justified custom-tabs-glass"
-                >
-                  <Tab eventKey="login" title="Iniciar Sesión">
-                    <div className="pt-2">
-                      <LoginForm /> {/* Componente de login */}
-                    </div>
-                  </Tab>
+              {/* Cabecera: icono + bienvenida */}
+              <div className="text-center mb-4">
+                <img
+                  src={sunnyIcon} // Icono del Thousand Sunny
+                  alt="Thousand Sunny"
+                  className="sunny-icon mb-2" // Tamaño controlado por CSS
+                />
+                <h1 className="fw-bold h2 text-white">¡Bienvenido, {user.username}!</h1>
+                <p className="text-light opacity-75">Tu aventura continúa. ¿Listo para zarpar?</p>
+              </div>
 
-                  <Tab eventKey="register" title="Registrarse">
-                    <div className="pt-2">
-                      <RegisterForm /> {/* Componente de registro */}
-                    </div>
-                  </Tab>
-                </Tabs>
+              <Row className="g-3">
 
-              </Card.Body>
-            </Card>
-          </Col>
+                {/* Card 1: Puntuación total (calculada desde el progreso) */}
+                <Col md={4}>
+                  <Card className="glass-card-extreme border-0 h-100">
+                    <Card.Body className="p-4 d-flex flex-column align-items-center justify-content-center text-center">
+                      <p className="text-white-50 small fw-bold text-uppercase mb-3">Puntuación Total</p>
+                      <div className="home-stat-big-number text-warning">
+                        {userTotalScore === null
+                          ? <Spinner animation="border" size="sm" variant="warning" />
+                          : Number(userTotalScore).toLocaleString('es-ES')}
+                      </div>
+                      <small className="text-white-50 mt-1">puntos acumulados</small>
+                    </Card.Body>
+                  </Card>
+                </Col>
+
+                {/* Card 2: Avatar + botón al mapa */}
+                <Col md={4}>
+                  <Card className="glass-card-extreme border-0 h-100">
+                    <Card.Body className="p-4 d-flex flex-column align-items-center justify-content-center text-center">
+                      <div className="home-stat-avatar mb-3">
+                        <img
+                          src={user.avatarUrl || getCharacterImagePath(user.username)}
+                          alt="Avatar"
+                          onError={(e) => {
+                            const img = e.currentTarget;
+                            const step = img.dataset.fallbackStep || '0';
+                            if (step === '0') { img.dataset.fallbackStep = '1'; img.src = PLACEHOLDER_IMAGE; return; }
+                            img.onerror = null; img.src = SAFE_FALLBACK_IMAGE;
+                          }}
+                        />
+                      </div>
+                      <h4 className="text-white fw-bold mb-3">{user.username}</h4>
+                      <Button
+                        variant="warning"
+                        className="fw-bold px-4 w-100"
+                        onClick={() => navigate('/mapa')}
+                      >
+                        Ir al Mapa
+                      </Button>
+                    </Card.Body>
+                  </Card>
+                </Col>
+
+                {/* Card 3: Berries */}
+                <Col md={4}>
+                  <Card className="glass-card-extreme border-0 h-100">
+                    <Card.Body className="p-4 d-flex flex-column align-items-center justify-content-center text-center">
+                      <p className="text-white-50 small fw-bold text-uppercase mb-3">Berries</p>
+                      <div className="home-stat-big-number text-warning">
+                        {Number(user.berries || 0).toLocaleString('es-ES')}
+                      </div>
+                      <small className="text-white-50 mt-1">monedas del reino</small>
+                    </Card.Body>
+                  </Card>
+                </Col>
+
+              </Row>
+            </Col>
+
+          ) : (
+            /* ── SIN SESIÓN: formulario login / registro ── */
+            <Col md={7} lg={5} className="ps-lg-5 mb-4 mb-lg-0">
+              <Card className="glass-card-extreme border-0 shadow-lg">
+                <Card.Body className="p-4 p-md-5">
+
+                  {/* Cabecera: icono + título */}
+                  <div className="text-center mb-4">
+                    <img
+                      src={sunnyIcon} // Icono del Thousand Sunny
+                      alt="Thousand Sunny"
+                      className="sunny-icon mb-2" // Tamaño controlado por CSS
+                    />
+                    <h1 className="fw-bold h2 text-white">One Quiz Journey</h1>
+                    <p className="text-light opacity-75">
+                      ¡Embárcate en una aventura! Inicia sesión o regístrate.
+                    </p>
+                  </div>
+
+                  {/* Tabs: Login / Registro */}
+                  <Tabs
+                    defaultActiveKey="login" // Por defecto muestra la pestaña login
+                    id="auth-tabs"
+                    className="mb-4 nav-justified custom-tabs-glass"
+                  >
+                    <Tab eventKey="login" title="Iniciar Sesión">
+                      <div className="pt-2">
+                        <LoginForm /> {/* Componente de login */}
+                      </div>
+                    </Tab>
+
+                    <Tab eventKey="register" title="Registrarse">
+                      <div className="pt-2">
+                        <RegisterForm /> {/* Componente de registro */}
+                      </div>
+                    </Tab>
+                  </Tabs>
+
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
+
         </Row>
 
         {/* Fila ranking: top 3 usuarios */}

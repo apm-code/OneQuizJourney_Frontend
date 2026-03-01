@@ -31,8 +31,8 @@ function LoginForm() {
     try {
       // Se intenta el login: si ok, AuthContext guarda el user
       await login(formData.email, formData.password);
-      // Se redirige al mapa
-      navigate('/mapa');
+      // Se redirige al home
+      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Error al iniciar sesión');
     }
