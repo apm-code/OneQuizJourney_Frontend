@@ -1,8 +1,27 @@
+// Importaciones de imágenes disponibles localmente (gestionadas por el bundler)
+import luffyImg from '../assets/images/characters/luffy.webp';
+import zoroImg from '../assets/images/characters/zoro.webp';
+import lawImg from '../assets/images/characters/law.webp';
+import shanksImg from '../assets/images/characters/shanks.webp';
+import teachImg from '../assets/images/characters/teach.webp';
+import whitebeardImg from '../assets/images/characters/whitebeard.webp';
+
+// Mapa de personajes con imagen local disponible
+// Clave: nombre normalizado del personaje (sin espacios, sin acentos, minúsculas)
+export const CHARACTER_IMAGES = {
+  luffy: luffyImg,
+  zoro: zoroImg,
+  law: lawImg,
+  shanks: shanksImg,
+  teach: teachImg,
+  whitebeard: whitebeardImg,
+};
+
 // Imagen por defecto si falla la carga principal
-export const PLACEHOLDER_IMAGE = '/images/characters/luffy.webp';
+export const PLACEHOLDER_IMAGE = luffyImg;
 
 // Imagen de respaldo final si también falla el placeholder
-export const SAFE_FALLBACK_IMAGE = '/images/characters/zoro.webp';
+export const SAFE_FALLBACK_IMAGE = zoroImg;
 
 // Lista de personajes disponibles para usar como avatar
 // Sirve para generar el selector de avatares y validar claves
@@ -17,6 +36,29 @@ export const CHARACTER_IMAGE_KEYS = [
 // Ejemplo: "Isla del Amanecer" → dawn-island.webp
 const islandAliases = {
   'isla del amanecer': 'dawn-island',
+};
+
+// Aliases para nombres completos de personajes → nombre corto del archivo de imagen
+// Necesario porque los nombres del seed (ej: "Monkey D. Luffy") generan una clave
+// distinta al nombre del archivo (ej: "luffy.webp")
+const characterAliases = {
+  'monkeydluffy': 'luffy',
+  'roronoazoro': 'zoro',
+  'trafalgardwaterlaw': 'law',
+  'shankselpellirrojo': 'shanks',
+  'marshalldteach': 'teach',
+  'edwardnewgate': 'whitebeard',
+  'vinsmokesanji': 'sanji',
+  'goldroger': 'roger',
+  'tonytonychopper': 'chopper',
+  'portgasdace': 'ace',
+  'roblucci': 'lucci',
+  'nicorobin': 'robin',
+  'silversrayleigh': 'rayleigh',
+  'boahancock': 'hancock',
+  'donquixotedoflamingo': 'doflamingo',
+  'charlottekatakuri': 'katakuri',
+  'draculemihawk': 'mihawk',
 };
 
 // Función que normaliza texto:
@@ -47,10 +89,13 @@ function toCharacterKey(name) {
   return normalize(name).replace(/[^a-z0-9]/g, '');
 }
 
-// Genera automáticamente la ruta de imagen de un personaje
+// Genera automáticamente la ruta de imagen de un personaje.
+// Primero busca en las imágenes locales importadas (bundler),
+// si no existe devuelve la ruta pública como fallback.
 export function getCharacterImagePath(name) {
   const key = toCharacterKey(name);
-  return `/images/characters/${key}.webp`;
+  const shortKey = characterAliases[key] || key;
+  return CHARACTER_IMAGES[shortKey] || `/images/characters/${shortKey}.webp`;
 }
 
 // Genera automáticamente la ruta de imagen de una isla
