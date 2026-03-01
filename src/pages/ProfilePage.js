@@ -9,9 +9,9 @@ import api from '../services/api';
 // Devuelve la variante Bootstrap para el badge según la rareza de la carta
 const rarityVariant = (rarity) => {
   if (!rarity) return 'secondary';
-  const r = rarity.toLowerCase();
-  if (r === 'legendary') return 'warning';
-  if (r === 'rare') return 'info';
+  const r = rarity.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (r === 'legendary' || r === 'legendaria') return 'warning';
+  if (r === 'rare' || r === 'rara' || r === 'epica') return 'info';
   return 'secondary';
 };
 
@@ -363,15 +363,19 @@ function ProfilePage() {
               <Row className="g-3">
                 {cards.map((card) => (
                   <Col xs={6} sm={4} md={3} key={card.userCardId}>
-                    <div className="album-card">
+                    <div className={`album-card rarity-${rarityVariant(card.rarity)}`}>
                       <img
-                        src={card.imageUrl}
+                        src={getCharacterImagePath(card.name)}
                         alt={card.name}
                         className="album-card-img"
                         onError={(e) => {
                           const img = e.currentTarget;
                           const step = img.dataset.fallbackStep || '0';
-                          if (step === '0') { img.dataset.fallbackStep = '1'; img.src = PLACEHOLDER_IMAGE; return; }
+                          // 1º: imageUrl de la API
+                          if (step === '0') { img.dataset.fallbackStep = '1'; img.src = card.imageUrl; return; }
+                          // 2º: placeholder genérico
+                          if (step === '1') { img.dataset.fallbackStep = '2'; img.src = PLACEHOLDER_IMAGE; return; }
+                          // 3º: imagen de seguridad final
                           img.onerror = null; img.src = SAFE_FALLBACK_IMAGE;
                         }}
                       />

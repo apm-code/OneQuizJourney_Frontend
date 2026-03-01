@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Card, Button, ProgressBar, Alert, Spinner, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getQuestionsByIsland, submitScore, validateAnswer } from '../../services/quiz.api';
-import { PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../../utils/imagePaths';
+import { getCharacterImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../../utils/imagePaths';
 import './QuizView.css';
 
 // Devuelve la variante Bootstrap para el badge según la rareza de la carta
 const rarityVariant = (rarity) => {
   if (!rarity) return 'secondary';
-  const r = rarity.toLowerCase();
-  if (r === 'legendary') return 'warning';
-  if (r === 'rare') return 'info';
+  const r = rarity.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (r === 'legendary' || r === 'legendaria') return 'warning';
+  if (r === 'rare' || r === 'rara' || r === 'epica') return 'info';
   return 'secondary';
 };
 
@@ -199,22 +199,28 @@ function QuizView({ islandId }) {
             {newCard && (
               <div className="card-reward-section mt-4">
                 <p className="text-warning fw-bold fs-5 mb-3">¡Has obtenido una carta de personaje!</p>
-                <div className="character-card mx-auto">
-                  <img
-                    src={newCard.imageUrl}
-                    alt={newCard.name}
-                    className="character-card-img"
-                    onError={(e) => {
-                      const img = e.currentTarget;
-                      const step = img.dataset.fallbackStep || '0';
-                      if (step === '0') { img.dataset.fallbackStep = '1'; img.src = PLACEHOLDER_IMAGE; return; }
-                      img.onerror = null; img.src = SAFE_FALLBACK_IMAGE;
-                    }}
-                  />
-                  <div className="character-card-body">
-                    <h5 className="text-white fw-bold mb-1">{newCard.name}</h5>
-                    {newCard.title && <small className="text-white-50 d-block mb-2">{newCard.title}</small>}
-                    <Badge bg={rarityVariant(newCard.rarity)} className="mb-2">{newCard.rarity}</Badge>
+                <div className="card-flip-wrapper">
+                  <div className={`character-card rarity-${rarityVariant(newCard.rarity)}`}>
+                    <img
+                      src={getCharacterImagePath(newCard.name)}
+                      alt={newCard.name}
+                      className="character-card-img"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        const step = img.dataset.fallbackStep || '0';
+                        // 1º intento: imageUrl de la API
+                        if (step === '0') { img.dataset.fallbackStep = '1'; img.src = newCard.imageUrl; return; }
+                        // 2º intento: placeholder genérico (luffy)
+                        if (step === '1') { img.dataset.fallbackStep = '2'; img.src = PLACEHOLDER_IMAGE; return; }
+                        // 3º intento: imagen de seguridad final (zoro)
+                        img.onerror = null; img.src = SAFE_FALLBACK_IMAGE;
+                      }}
+                    />
+                    <div className="character-card-body">
+                      <h5 className="text-white fw-bold mb-1">{newCard.name}</h5>
+                      {newCard.title && <small className="text-white-50 d-block mb-2">{newCard.title}</small>}
+                      <Badge bg={rarityVariant(newCard.rarity)} className="mb-2">{newCard.rarity}</Badge>
+                    </div>
                   </div>
                 </div>
               </div>

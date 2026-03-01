@@ -71,28 +71,54 @@
 
 /* Tarjetas del álbum de colección */
 .album-card {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(245, 197, 66, 0.35);
-    border-radius: 14px;
+    background: linear-gradient(160deg, rgba(18, 18, 38, 0.95), rgba(8, 8, 20, 0.97));
+    border: 2px solid rgba(245, 197, 66, 0.7);
+    border-radius: 18px;
     overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 0 18px rgba(245, 197, 66, 0.25), 0 6px 20px rgba(0, 0, 0, 0.5);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .album-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(245, 197, 66, 0.25);
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 0 30px rgba(245, 197, 66, 0.45), 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Variantes de rareza */
+.album-card.rarity-warning {
+    border-color: rgba(255, 193, 7, 0.95);
+    box-shadow: 0 0 30px rgba(255, 193, 7, 0.4), 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+.album-card.rarity-warning:hover {
+    box-shadow: 0 0 45px rgba(255, 193, 7, 0.6), 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.album-card.rarity-info {
+    border-color: rgba(13, 202, 240, 0.85);
+    box-shadow: 0 0 22px rgba(13, 202, 240, 0.35), 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+.album-card.rarity-info:hover {
+    box-shadow: 0 0 35px rgba(13, 202, 240, 0.55), 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.album-card.rarity-secondary {
+    border-color: rgba(200, 200, 200, 0.5);
+    box-shadow: 0 0 12px rgba(200, 200, 200, 0.15), 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .album-card-img {
     width: 100%;
-    height: 160px;
+    height: 200px;
     object-fit: cover;
+    object-position: top center;
     display: block;
+    border-bottom: 1px solid rgba(245, 197, 66, 0.25);
 }
 
 .album-card-body {
-    padding: 10px;
+    padding: 10px 8px 12px;
     text-align: center;
+    background: linear-gradient(180deg, rgba(245, 197, 66, 0.06) 0%, transparent 100%);
 }
 
 .album-card-name {
