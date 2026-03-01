@@ -75,3 +75,78 @@
   margin: 0 auto;
   padding: 110px 16px 40px; /* 👈 110 = navbar + aire. Ajusta si quieres */
 }
+
+/* ───────────────────────────────────────────────
+   CARTA DE RECOMPENSA – animación + estilos
+─────────────────────────────────────────────── */
+
+/* Sección contenedora: aparece con fade suave */
+.card-reward-section {
+  animation: rewardFadeIn 0.3s ease-out both;
+}
+
+@keyframes rewardFadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Wrapper que aporta la perspectiva 3D para el flip */
+.card-flip-wrapper {
+  perspective: 900px;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+/* La carta: formato portrait (proporción ~2:3 de carta coleccionable).
+   Las imágenes de personajes son ~400 × 600 px, así que usamos 190 × 280. */
+.character-card {
+  width: 190px;
+  background: linear-gradient(160deg, rgba(18, 18, 38, 0.95), rgba(8, 8, 20, 0.97));
+  border: 2px solid rgba(245, 197, 66, 0.7);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 0 25px rgba(245, 197, 66, 0.35), 0 12px 40px rgba(0, 0, 0, 0.6);
+  /* Flip 3D: arranca desde el reverso y gira hasta mostrarse */
+  animation: cardFlipIn 0.85s cubic-bezier(0.35, 0, 0.2, 1) 0.2s both;
+}
+
+@keyframes cardFlipIn {
+  0%   { transform: rotateY(180deg) scale(0.75); opacity: 0; }
+  55%  { opacity: 1; }
+  75%  { transform: rotateY(-8deg) scale(1.04); }
+  90%  { transform: rotateY(3deg) scale(1); }
+  100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+}
+
+/* Variantes de brillo según rareza del personaje */
+.character-card.rarity-warning {
+  border-color: rgba(255, 193, 7, 0.95);
+  box-shadow: 0 0 40px rgba(255, 193, 7, 0.55), 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.character-card.rarity-info {
+  border-color: rgba(13, 202, 240, 0.85);
+  box-shadow: 0 0 28px rgba(13, 202, 240, 0.45), 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.character-card.rarity-secondary {
+  border-color: rgba(200, 200, 200, 0.5);
+  box-shadow: 0 0 18px rgba(200, 200, 200, 0.2), 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Imagen del personaje: ocupa toda la anchura y altura portrait */
+.character-card-img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  border-bottom: 1px solid rgba(245, 197, 66, 0.25);
+}
+
+/* Pie de la carta con nombre, título y rareza */
+.character-card-body {
+  padding: 10px 8px 12px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(245, 197, 66, 0.06) 0%, transparent 100%);
+}

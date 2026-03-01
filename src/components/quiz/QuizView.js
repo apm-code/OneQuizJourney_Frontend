@@ -1,8 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Button, ProgressBar, Alert, Spinner } from 'react-bootstrap';
+import { Card, Button, ProgressBar, Alert, Spinner, Badge } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { getQuestionsByIsland, submitScore, validateAnswer } from '../../services/quiz.api';
+import { getCharacterImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../../utils/imagePaths';
 import './QuizView.css';
+
+// Devuelve la variante Bootstrap para el badge según la rareza de la carta
+const rarityVariant = (rarity) => {
+  if (!rarity) return 'secondary';
+  const r = rarity.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (r === 'legendary' || r === 'legendaria') return 'warning';
+  if (r === 'rare' || r === 'rara' || r === 'epica') return 'info';
+  return 'secondary';
+};
 
 // Componente que gestiona el quiz de una isla concreta
 function QuizView({ islandId }) {
@@ -17,6 +27,7 @@ function QuizView({ islandId }) {
   const [showResult, setShowResult] = useState(false); // Si true, se muestra la pantalla final del resultado
   const [loading, setLoading] = useState(true); // Loading mientras se cargan preguntas
   const [error, setError] = useState(''); // Mensaje de error si algo falla
+  const [newCard, setNewCard] = useState(null); // Carta obtenida al completar al 100% (null si no se obtuvo)
 
   // Cada vez que cambia el islandId: reiniciamos el quiz y cargamos preguntas nuevas
   useEffect(() => {
@@ -104,7 +115,8 @@ function QuizView({ islandId }) {
 
         // Si ES la última, intenta guardar puntuación en el backend
         try {
-          await submitScore(islandId, updatedScore);
+          const result = await submitScore(islandId, updatedScore);
+          setNewCard(result?.newCard || null); // Guarda la carta si se obtuvo al 100%
         } catch (submitError) {
           console.error(submitError); // Si falla guardar, no rompemos el quiz (solo lo registramos)
         }
@@ -132,6 +144,7 @@ function QuizView({ islandId }) {
     setSelectedAnswer(null);
     setIsSelectedAnswerCorrect(null);
     setScore(0);
+    setNewCard(null); // Limpia la carta al reintentar
     setLoading(false); // (ojo: aquí solo resetea, no vuelve a pedir preguntas)
   };
 
@@ -181,6 +194,44 @@ function QuizView({ islandId }) {
             <p className="text-light fs-5">
               {passed ? 'Has conquistado esta isla.' : 'Tu barco necesita reparaciones. ¡Reinténtalo!'}
             </p>
+
+            {/* Carta obtenida al conseguir el 100% */}
+            {newCard && (
+              <div className="card-reward-section mt-4">
+                <p className="text-warning fw-bold fs-5 mb-3">¡Has obtenido una carta de personaje!</p>
+                <div className="card-flip-wrapper">
+                  <div className={`character-card rarity-${rarityVariant(newCard.rarity)}`}>
+                    <img
+                      src={getCharacterImagePath(newCard.name)}
+                      alt={newCard.name}
+                      className="character-card-img"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        const step = img.dataset.fallbackStep || '0';
+                        // 1º intento: imageUrl de la API
+                        if (step === '0') { img.dataset.fallbackStep = '1'; img.src = newCard.imageUrl; return; }
+                        // 2º intento: placeholder genérico (luffy)
+                        if (step === '1') { img.dataset.fallbackStep = '2'; img.src = PLACEHOLDER_IMAGE; return; }
+                        // 3º intento: imagen de seguridad final (zoro)
+                        img.onerror = null; img.src = SAFE_FALLBACK_IMAGE;
+                      }}
+                    />
+                    <div className="character-card-body">
+                      <h5 className="text-white fw-bold mb-1">{newCard.name}</h5>
+                      {newCard.title && <small className="text-white-50 d-block mb-2">{newCard.title}</small>}
+                      <Badge bg={rarityVariant(newCard.rarity)} className="mb-2">{newCard.rarity}</Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Mensaje motivador si pasó pero no obtuvo carta (ya la tenía o puntuación < 100%) */}
+            {passed && !newCard && score < questions.length && (
+              <p className="text-white-50 small mt-3">
+                Consigue el 100% para ganar la carta de esta isla
+              </p>
+            )}
 
             {/* Botones finales */}
             <div className="d-flex justify-content-center gap-3 mt-4">
@@ -257,9 +308,12 @@ function QuizView({ islandId }) {
         </Card.Body>
       </Card>
 
-      {/* Texto inferior con puntuación actual */}
+      {/* Texto inferior con puntuación actual y pista de carta */}
       <div className="text-center mt-4 text-white-50">
-        Puntuación actual: <span className="text-warning fw-bold">{score}</span>
+        <div>Puntuación actual: <span className="text-warning fw-bold">{score}</span></div>
+        <small className="text-white-50 mt-1 d-block">
+          Responde todo bien para ganar la carta de esta isla
+        </small>
       </div>
     </div>
   );

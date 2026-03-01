@@ -51,3 +51,9 @@ export const submitScore = async (islandId, score) => {
   );
   return data;
 };
+
+// Obtiene las cartas de personaje que posee el usuario autenticado
+export const getMyCards = async () => {
+  const { data } = await api.get('/quiz/my-cards');
+  return data;
+};
