@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import LoginForm from '../components/auth/LoginForm';
 import RegisterForm from '../components/auth/RegisterForm';
 import { getPublicRanking, getProgress } from '../services/quiz.api';
-import { getCharacterImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../utils/imagePaths';
+import { getAvatarImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../utils/imagePaths';
 import { useAuth } from '../context/AuthContext';
 import sunnyIcon from '../assets/thousand-sunny.png';
 
@@ -117,7 +117,7 @@ function HomePage() {
                     <Card.Body className="p-4 d-flex flex-column align-items-center justify-content-center text-center">
                       <div className="home-stat-avatar mb-3">
                         <img
-                          src={user.avatarUrl || getCharacterImagePath(user.username)}
+                          src={user.avatarUrl || getAvatarImagePath(user.username)}
                           alt="Avatar"
                           onError={(e) => {
                             const img = e.currentTarget;
@@ -240,7 +240,7 @@ function HomePage() {
                         <div className="home-top-avatar">
                           <img
                             // Si no hay avatarUrl, intenta sacar imagen por username
-                            src={user.avatarUrl || getCharacterImagePath(user.username)}
+                            src={user.avatarUrl || getAvatarImagePath(user.username)}
                             alt={`Avatar de ${user.username}`}
 
                             // Fallback si falla la imagen

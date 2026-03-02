@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Card, Table, Spinner, Alert } from 'react-bootstrap';
 import './RankingPage.css';
-import { getCharacterImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../utils/imagePaths';
+import { getAvatarImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../utils/imagePaths';
 import { getRanking } from '../services/quiz.api';
 
 function RankingPage() {
@@ -162,8 +162,8 @@ function RankingPage() {
                               <div className="d-flex align-items-center gap-3">
                                 <div className="rank-avatar">
                                   <img
-                                    // Usa avatar guardado; si no hay, usa uno basado en username
-                                    src={u.avatarUrl || getCharacterImagePath(u.username)}
+                                    // Se usa el avatar guardado: si no hay, usa uno basado en el nombre de usuario
+                                    src={u.avatarUrl || getAvatarImagePath(u.username)}
                                     alt={`Avatar de ${u.username}`}
 
                                     // Fallback si la imagen falla

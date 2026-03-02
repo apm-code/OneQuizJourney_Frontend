@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Card, Row, Col, Badge, Spinner, Alert } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import './ProfilePage.css';
-import { CHARACTER_IMAGE_KEYS, getCharacterImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE } from '../utils/imagePaths';
+import { AVATAR_CHARACTER_KEYS, getAvatarImagePath, getCharacterImagePath, PLACEHOLDER_IMAGE, SAFE_FALLBACK_IMAGE,} from '../utils/imagePaths';
 import { getProgress, getMyCards } from '../services/quiz.api';
 import api from '../services/api';
 
@@ -99,7 +99,7 @@ function ProfilePage() {
 
   // Función para seleccionar avatar (se llama al hacer click en uno de los avatares)
   const handleAvatarSelect = async (avatarKey) => {
-    const avatarUrl = getCharacterImagePath(avatarKey); // Convierte la "key" en ruta real de imagen
+    const avatarUrl = getAvatarImagePath(avatarKey); // Convierte la "key" en ruta real de avatar
 
     // Si ya tiene ese avatar o si estamos guardando, no hacemos nada
     if (profile?.avatarUrl === avatarUrl || avatarSaving) return;
@@ -191,7 +191,7 @@ function ProfilePage() {
                   >
                     <img
                       // Usa avatar guardado; si no existe, usa uno por defecto según username (o luffy)
-                      src={profile?.avatarUrl || getCharacterImagePath(profile?.username || 'luffy')}
+                      src={profile?.avatarUrl || getAvatarImagePath(profile?.username || 'luffy')}
                       alt="Avatar"
                       className="avatar-img"
                       width={200}
@@ -220,8 +220,8 @@ function ProfilePage() {
                 {showAvatarPicker && (
                   <div className="mt-3 p-2 rounded" style={{ background: 'rgba(0,0,0,0.25)' }}>
                     <div className="d-flex flex-wrap gap-2 justify-content-center">
-                      {CHARACTER_IMAGE_KEYS.map((key) => {
-                        const avatarUrl = getCharacterImagePath(key);
+                      {AVATAR_CHARACTER_KEYS.map((key) => {
+                        const avatarUrl = getAvatarImagePath(key);
                         const isActive = profile?.avatarUrl === avatarUrl; // Marca el avatar actual
 
                         return (

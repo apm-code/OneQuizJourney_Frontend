@@ -1,4 +1,4 @@
-// Importaciones de imágenes disponibles localmente (gestionadas por el bundler)
+// Importaciones de imágenes disponibles localmente
 import luffyImg from '../assets/images/characters/luffy.webp';
 import zoroImg from '../assets/images/characters/zoro.webp';
 import lawImg from '../assets/images/characters/law.webp';
@@ -8,7 +8,7 @@ import whitebeardImg from '../assets/images/characters/whitebeard.webp';
 
 // Mapa de personajes con imagen local disponible
 // Clave: nombre normalizado del personaje (sin espacios, sin acentos, minúsculas)
-export const CHARACTER_IMAGES = {
+export const REWARD_CHARACTER_IMAGES = {
   luffy: luffyImg,
   zoro: zoroImg,
   law: lawImg,
@@ -25,11 +25,14 @@ export const SAFE_FALLBACK_IMAGE = zoroImg;
 
 // Lista de personajes disponibles para usar como avatar
 // Sirve para generar el selector de avatares y validar claves
-export const CHARACTER_IMAGE_KEYS = [
+export const AVATAR_CHARACTER_KEYS = [
   'shanks', 'usopp', 'sanji', 'nami', 'roger', 'chopper', 'ace', 'enel', 'franky',
   'lucci', 'robin', 'brook', 'rayleigh', 'hancock', 'crocodile', 'whitebeard',
   'jinbe', 'law', 'doflamingo', 'katakuri', 'zoro', 'kaido', 'teach', 'mihawk', 'luffy',
 ];
+
+// Alias para mantener compatibilidad con imports antiguos
+export const CHARACTER_IMAGE_KEYS = AVATAR_CHARACTER_KEYS;
 
 // Alias para islas cuyo nombre en la base de datos no coincide
 // exactamente con el nombre del archivo de imagen
@@ -89,13 +92,23 @@ function toCharacterKey(name) {
   return normalize(name).replace(/[^a-z0-9]/g, '');
 }
 
-// Genera automáticamente la ruta de imagen de un personaje.
-// Primero busca en las imágenes locales importadas (bundler),
-// si no existe devuelve la ruta pública como fallback.
-export function getCharacterImagePath(name) {
+function toCharacterShortKey(name) {
   const key = toCharacterKey(name);
-  const shortKey = characterAliases[key] || key;
-  return CHARACTER_IMAGES[shortKey] || `/images/characters/${shortKey}.webp`;
+  return characterAliases[key] || key;
+}
+
+// Imagen de perfil: siempre sale de public/images/characters
+export function getAvatarImagePath(name) {
+  const shortKey = toCharacterShortKey(name);
+  return `/images/characters/${shortKey}.webp`;
+}
+
+// Imagen de personaje para recompensas:
+// 1) intenta la imagen local de recompensa
+// 2) si no existe, usa imagen de perfil
+export function getCharacterImagePath(name) {
+  const shortKey = toCharacterShortKey(name);
+  return REWARD_CHARACTER_IMAGES[shortKey] || getAvatarImagePath(shortKey);
 }
 
 // Genera automáticamente la ruta de imagen de una isla
