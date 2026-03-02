@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import api from '../services/api';
 
 // Se crea el contexto de autenticación (para compartir la sesión en toda la app)
@@ -10,6 +10,7 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   // user guarda el usuario logueado (objeto) o null si no hay sesión
   const [user, setUser] = useState(null);
+  const isLoggingOutRef = useRef(false);
 
   // loading indica si todavía estamos comprobando si hay sesión activa
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,10 @@ export const AuthProvider = ({ children }) => {
   // Esto sirve para no perder el login al recargar la página
   const refreshProfile = async () => {
     const { data } = await api.get('/auth/profile'); // GET protegido: si hay cookie válida, devuelve el usuario
-    setUser(data); // Guardamos usuario en el estado global
+    // Evita que una petición antigua vuelva a "loguear" el estado tras hacer logout
+    if (!isLoggingOutRef.current) {
+      setUser(data); // Guardamos usuario en el estado global
+    }
     return data; // Devolvemos datos por si algún componente quiere usarlos
   };
 
@@ -42,13 +46,15 @@ export const AuthProvider = ({ children }) => {
 
   // Función login: hace POST al backend y guarda el usuario en el estado
   const login = async (email, password) => {
+    isLoggingOutRef.current = false;
     const response = await api.post('/auth/login', { email, password }); // El backend crea cookie httpOnly con el token
-    setUser(response.data.user); // Guardamos el usuario devuelto por el backend
+    await refreshProfile(); // Carga el perfil completo tras l login
     return response; // Devolvemos la respuesta por si se necesita en el componente
   };
 
   // Función logout: pide al backend cerrar sesión y limpia el estado local
   const logout = async () => {
+    isLoggingOutRef.current = true;
     try {
       // El backend debería borrar la cookie JWT (clearCookie)
       await api.post('/auth/logout');
